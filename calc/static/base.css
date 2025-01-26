@@ -1,186 +1,75 @@
-@import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Open+Sans:wght@400;700&display=swap');
+/* static/base.css */
 
-* {
-  box-sizing: border-box;
-}
-
-html {
-  font-family: 'Open Sans', 'Lato', sans-serif;
-}
-
+/* General body styling */
 body {
-  min-width: 465px;
+  font-family: 'Arial', sans-serif;
+  background-color: #f4f7fa;
+  color: #333;
   margin: 0;
-  padding: 0;
-  background-image: url('../images/bg.png');
-  background-size: cover;
 }
 
-/* Page Wrapper for layout */
-.page-wrapper {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh; /* Full viewport height */
-}
-
-/* Main content stretches to fill space */
-.main-content {
-  flex: 1; /* Grow to take available space */
-}
-
-/* Navigation Bar */
-#main-navigation {
-  width: 100%;
-  height: 5rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 5%;
-  background-color: #290594;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
-}
-
-.hamburger-menu {
-  display: none;
-  cursor: pointer;
-}
-
+/* Navbar Styling */
 .navbar {
-  display: flex;
-  align-items: center;
+  border-bottom: 2px solid #e0e0e0;
 }
 
-#main-navigation a {
-  text-decoration: none;
-  color: #f4f4f4;
+.navbar-brand {
   font-weight: bold;
-  padding-left: 10px;
-  transition: color 0.3s;
+  font-size: 1.5rem;
 }
 
-#main-navigation a:hover {
-  color: #2b00ff;
+.navbar-nav .nav-link {
+  font-size: 1.1rem;
+  margin-right: 1.5rem;
 }
 
-/* Responsive Navigation */
-@media screen and (max-width: 600px) {
-  .hamburger-menu {
-    display: block;
-  }
-
-  .navbar {
-    display: none;
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .navbar.active {
-    display: flex;
-  }
-
-  #l1 {
-    display: none;
-  }
-}
-
-/* Footer */
-footer {
-  text-align: center;
-  padding: 1rem;
-  background-color: #290594;
-  color: #fff;
-  width: 100%;
-  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.25);
-}
-
-/* Typography */
+/* Page Titles */
 h1, h2, h3 {
-  font-family: 'Lato', sans-serif;
+  color: #343a40;
   font-weight: bold;
 }
 
-/* Welcome Section */
-#welcome {
-  background: linear-gradient(to right top, #270d77, #290594);
-  padding: 100px 10% 20px 10%;
+/* Form and Buttons */
+.form-label {
+  font-weight: bold;
 }
 
-#welcome header {
-  display: flex;
-  align-items: flex-start;
-  margin: 3rem auto;
+.form-control {
+  border-radius: 0.375rem;
+  padding: 0.75rem;
+  font-size: 1rem;
 }
 
-#welcome img {
-  width: 10rem;
-  height: 10rem;
-  object-fit: cover;
-  border: 5px solid white;
-  border-radius: 12px;
-  background-color: #ffe1bf;
-  transform: rotateZ(-5deg);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+.btn {
+  border-radius: 0.375rem;
+  font-weight: 600;
 }
 
-#welcome h2 {
-  font-size: 3.5rem;
-  margin: 40px 2rem;
-  color: #e4e4e4;
+.btn-primary {
+  background-color: #007bff;
+  border-color: #007bff;
 }
 
-@media screen and (max-width: 600px) {
-  #welcome h2 {
-    font-size: 2.5rem;
-  }
+.btn-primary:hover {
+  background-color: #0056b3;
+  border-color: #004085;
 }
 
-/* Action Section */
-.all_actions {
-  background-color: #f7f7f7;
-  padding: 2rem;
-  border-radius: 12px;
-  width: 80%;
-  margin: 2rem auto;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border: 2px solid #290594;
+/* Table Styles */
+.table {
+  border: 1px solid #dee2e6;
 }
 
-.all_actions ul {
-  list-style: none;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 2rem;
-  padding: 0;
+.table thead {
+  background-color: #007bff;
+  color: white;
 }
 
-.all_actions li {
-  flex: 1;
+.table tbody tr:hover {
+  background-color: #f1f1f1;
 }
 
-.action {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-}
-
-.action a {
-  text-decoration: none;
-  color: #000;
-  padding: 1rem;
-  transition: all 0.3s;
-}
-
-.action a:hover {
-  background-color: #290594;
-  color: #fff;
-  border-radius: 10px;
-}
-
-.action img {
-  width: 10rem;
-  height: 10rem;
-  object-fit: cover;
-  border: #e4e4e4 5px solid;
-  border-radius: 50%;
+/* Alerts */
+.alert {
+  border-radius: 0.375rem;
 }

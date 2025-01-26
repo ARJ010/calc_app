@@ -1,21 +1,22 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bulk Register Advocates</title>
-</head>
-<body>
-    <h1>Bulk Register Advocates</h1>
-    {% if messages %}
+{% extends 'base.html' %}
+
+{% block title %}Bulk Register Advocates - C.A.L.C.{% endblock %}
+
+{% block content %}
+<h2>Bulk Register Advocates</h2>
+
+{% if messages %}
+    <div class="alert alert-warning">
         {% for message in messages %}
-        <div class="alert">{{ message }}</div>
+            <p>{{ message }}</p>
         {% endfor %}
-    {% endif %}
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Upload</button>
-    </form>
-</body>
-</html>
+    </div>
+{% endif %}
+
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Upload CSV</button>
+</form>
+
+{% endblock %}

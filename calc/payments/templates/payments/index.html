@@ -1,51 +1,8 @@
 {% extends 'base.html' %}
 
-{% load static %}
+{% block title %}Home - CALC{% endblock %}
 
-{% block title %}
-  CALC-Admin
-{% endblock %}
-
-{% block style_content %}
-  <link rel="stylesheet" href="{% static 'payments/index.css' %}" />
-{% endblock %}
-
-{% block type %}
-  <h1><a href="{% url 'index' %}">CALC</a></h1>
-{% endblock %}
-
-{% block body_content %}
-  <section id="welcome">
-    <header>
-      <img src="{% static 'images/admin.png' %}" alt="Admin" />
-      <h2>Admin Dashboard</h2>
-    </header>
-  </section>
-
-  <section class="all_actions">
-    <ul>
-      <li>
-        <article class="action">
-          <a href="{% url 'advocate_list' %}">
-            <img src="{% static 'images/advocates.png' %}" alt="advocates" />
-            <div class="action_content">
-              <h3>Advocates</h3>
-              <p>View, Add, Edit, Delete</p>
-            </div>
-          </a>
-        </article>
-      </li>
-      <li>
-        <article class="action">
-          <a href="#">
-            <img src="{% static 'images/payments.png' %}" alt="payments" />
-            <div class="action_content">
-              <h3>Payments</h3>
-              <p>Payment Details</p>
-            </div>
-          </a>
-        </article>
-      </li>
-    </ul>
-  </section>
+{% block content %}
+<h1>Welcome to CALC</h1>
+<p class="lead">Counsel Accounting and Ledger Control (CALC) is designed to manage advocate details and monthly payments effectively.</p>
 {% endblock %}

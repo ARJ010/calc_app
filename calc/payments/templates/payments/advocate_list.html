@@ -1,39 +1,39 @@
 {% extends 'base.html' %}
 
-{% load static %}
+{% block title %}Advocate List{% endblock %}
 
-{% block title %}
-Advocate List
-{% endblock %}
-
-{% block style_content %}
-  <link rel="stylesheet" href="{% static 'payments/adv_list.css' %}" />
-  <link rel="stylesheet" href="{% static 'payments/sidebar.css' %}" />
-{% endblock %}
-
-{% block type %}
-  <h1><a href="{% url 'index' %}">CALC</a></h1>
-{% endblock %}
-
-{% block sidebar %}
-  {% include 'payments/includes/sidebar.html' %}
-{% endblock %}
-
-{% block body_content %}
+{% block content %}
 <section id="all-advocates">
     {% if messages %}
         {% for message in messages %}
-        <div class="alert">
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
             <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
             {{ message }}
         </div>
         {% endfor %}
     {% endif %}
+
     <h2>All Advocates</h2>
-    <ul>
+    <div class="row">
         {% for advocate in advocates %}
-            {% include 'payments/includes/advocate_card.html' %}
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title">{{ advocate.name }}</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                        <strong>Enrolment No.:</strong> {{ advocate.enrolment_no }} <br>
+                        <strong>Bar Registration:</strong> {{ advocate.bar_registration }} <br>
+                        <strong>Email:</strong> {{ advocate.email }} <br>
+                        <strong>Phone:</strong> {{ advocate.mobile_number }} <br>
+                    </p>
+                    <a href="#" class="btn btn-info btn-sm">View Details</a>
+                    <a href="#" class="btn btn-warning btn-sm">Edit</a>
+                </div>
+            </div>
+        </div>
         {% endfor %}
-    </ul>
+    </div>
 </section>
 {% endblock %}

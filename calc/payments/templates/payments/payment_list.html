@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Payment List</h2>
+<a class="btn btn-primary mb-3" href="{% url 'add_payment' %}">Add Payment</a>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th scope="col">Advocate</th>
+            <th scope="col">Amount</th>
+            <th scope="col">Month</th>
+            <th scope="col">Payment Date</th>
+            <th scope="col">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for payment in payments %}
+        <tr>
+            <td>{{ payment.advocate.name }}</td>
+            <td>{{ payment.amount }}</td>
+            <td>{{ payment.month }}</td>
+            <td>{{ payment.payment_date }}</td>
+            <td>
+                <a href="{% url 'edit_payment' payment.id %}" class="btn btn-warning btn-sm">Edit</a>
+                <a href="{% url 'delete_payment' payment.id %}" class="btn btn-danger btn-sm">Delete</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
