@@ -16,10 +16,16 @@ body {
   background-size: cover;
 }
 
-/* Typography */
-h1, h2, h3 {
-  font-family: 'Lato', sans-serif;
-  font-weight: bold;
+/* Page Wrapper for layout */
+.page-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* Full viewport height */
+}
+
+/* Main content stretches to fill space */
+.main-content {
+  flex: 1; /* Grow to take available space */
 }
 
 /* Navigation Bar */
@@ -30,9 +36,6 @@ h1, h2, h3 {
   justify-content: space-between;
   align-items: center;
   padding: 0 5%;
-  position: absolute;
-  top: 0;
-  left: 0;
   background-color: #290594;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
 }
@@ -78,6 +81,22 @@ h1, h2, h3 {
   #l1 {
     display: none;
   }
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  padding: 1rem;
+  background-color: #290594;
+  color: #fff;
+  width: 100%;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.25);
+}
+
+/* Typography */
+h1, h2, h3 {
+  font-family: 'Lato', sans-serif;
+  font-weight: bold;
 }
 
 /* Welcome Section */
@@ -164,15 +183,4 @@ h1, h2, h3 {
   object-fit: cover;
   border: #e4e4e4 5px solid;
   border-radius: 50%;
-}
-
-/* Footer */
-footer {
-  text-align: center;
-  padding: 1rem;
-  background-color: #290594;
-  color: #fff;
-  position: relative;
-  bottom: 0;
-  width: 100%;
 }

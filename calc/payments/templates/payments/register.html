@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}
+Advocate Registration
+{% endblock %}
+
+{% block type %}
+  <h1><a href="{% url 'index' %}">CALC</a></h1>
+{% endblock %}
+
+
+{% block style_content %}
+
+    <link rel="stylesheet" href="{% static 'payments/registration.css' %}" />
+{% endblock %}
+
+{% comment "" %}
+{% block navigation %}
+  {% include 'manager/includes/sidemenu.html' %}
+{% endblock %}
+
+{% block sidebar %}
+  {% include 'manager/includes/sidebar.html' %}
+{% endblock %}
+
+{% block navigation2 %}
+  <div class="search-container">
+    <form action="{% url 'all_users' %}" method="get" class="search-form">
+      <div class="search-input-container">
+        <input type="hidden" name="user_type" value="{{ request.GET.user_type }}" />
+        <input type="text" name="qname" placeholder="Search for a user..." class="search-input" />
+        <button type="submit" class="search-button"><i class="fas fa-search"></i></button>
+      </div>
+    </form>
+  </div>
+{% endblock %}
+{% endcomment %}
+
+{% block body_content %}
+<form class="advocate-form" method="POST" action="{% url 'register_user' %}">
+  {% csrf_token %}
+  <fieldset>
+      <legend>Personal Information</legend>
+      <div class="row">
+          <div>
+              <label for="name">Full Name:</label>
+              <input type="text" id="name" name="name" required>
+          </div>
+          <div>
+              <label for="mobile_number">Mobile Number:</label>
+              <input type="text" id="mobile_number" name="mobile_number" required>
+          </div>
+      </div>
+      <div class="row">
+          <div>
+              <label for="date_of_birth">Date of Birth:</label>
+              <input type="date" id="date_of_birth" name="date_of_birth" required>
+          </div>
+          <div>
+              <label for="blood_group">Blood Group:</label>
+              <select id="blood_group" name="blood_group" required>
+                  <option value="">Select</option>
+                  <option value="A+">A+</option>
+                  <option value="A-">A-</option>
+                  <option value="B+">B+</option>
+                  <option value="B-">B-</option>
+                  <option value="AB+">AB+</option>
+                  <option value="AB-">AB-</option>
+                  <option value="O+">O+</option>
+                  <option value="O-">O-</option>
+              </select>
+          </div>
+      </div>
+  </fieldset>
+  <fieldset>
+      <legend>Professional Information</legend>
+      <div class="row">
+          <div>
+              <label for="enrolment_no">Enrolment Number:</label>
+              <input type="text" id="enrolment_no" name="enrolment_no" required>
+          </div>
+          <div>
+              <label for="date_of_enrolment">Date of Enrolment:</label>
+              <input type="date" id="date_of_enrolment" name="date_of_enrolment" required>
+          </div>
+      </div>
+      <div class="row">
+          <div>
+              <label for="bar_registration">Bar Registration Number:</label>
+              <input type="text" id="bar_registration" name="bar_registration" required>
+          </div>
+          <div>
+              <label for="email">Email:</label>
+              <input type="email" id="email" name="email" required>
+          </div>
+      </div>
+  </fieldset>
+  <fieldset>
+      <legend>Additional Information</legend>
+      <div>
+          <label for="address">Address:</label>
+          <textarea id="address" name="address" rows="3" required></textarea>
+      </div>
+      <div>
+          <label for="joined_date">Date Joined:</label>
+          <input type="date" id="joined_date" name="joined_date" required>
+      </div>
+  </fieldset>
+  <input type="submit" value="Register">
+</form>
+{% endblock %}
+

@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}
+Advocate List
+{% endblock %}
+
+{% block style_content %}
+  <link rel="stylesheet" href="{% static 'payments/adv_list.css' %}" />
+  <link rel="stylesheet" href="{% static 'payments/sidebar.css' %}" />
+{% endblock %}
+
+{% block type %}
+  <h1><a href="{% url 'index' %}">CALC</a></h1>
+{% endblock %}
+
+{% block sidebar %}
+  {% include 'payments/includes/sidebar.html' %}
+{% endblock %}
+
+{% block body_content %}
+<section id="all-advocates">
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert">
+            <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+            {{ message }}
+        </div>
+        {% endfor %}
+    {% endif %}
+    <h2>All Advocates</h2>
+    <ul>
+        {% for advocate in advocates %}
+            {% include 'payments/includes/advocate_card.html' %}
+        {% endfor %}
+    </ul>
+</section>
+{% endblock %}

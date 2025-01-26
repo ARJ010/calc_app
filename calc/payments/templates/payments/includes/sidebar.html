@@ -1,0 +1,31 @@
+<aside id="sidebar">
+  <ul>
+    <li>
+      <a href="{% url 'advocate_list' %}">Advocates</a>
+        <ul>
+          <li>
+            <a href="{% url 'register_user' %}">Add</a>
+          </li>
+          <li>
+            <a href="{% url 'bulk_register_advocates' %}">Bulk Add</a>
+          </li>
+          <li>
+            <a href="#">Delete</a>
+          </li>
+        </ul>
+    </li>
+    <li>
+      <a href="#">Payments</a>
+      {% if request.GET.user_type == 'checker' %}
+        <ul>
+          <li>
+            <a href="#">Add</a>
+          </li>
+          <li>
+            <a href="#">Delete</a>
+          </li>
+        </ul>
+      {% endif %}
+    </li>
+  </ul>
+</aside>

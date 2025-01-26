@@ -1,0 +1,17 @@
+{% load static %}
+
+<li>
+    <article class="advocate">
+        <a href="{% url 'advocate_details' advocate.id %}">
+            {% if advocate.profile_picture %}
+                <img src="{{ advocate.profile_picture.url }}" alt="{{ advocate.name }}">
+            {% else %}
+                <img src="{% static 'images/default_user.png' %}" alt="{{ advocate.name }}">
+            {% endif %}
+            <div class="post__content">
+                <h3>{{ advocate.name }}</h3>
+                <p>{{ advocate.bar_registration }}</p>
+            </div>
+        </a>
+    </article>
+</li>

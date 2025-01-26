@@ -16,30 +16,33 @@
     {% endblock %}
   </head>
   <body>
-    <header id="main-navigation">
-      {% block type %}
-      {% endblock %}
-      <div class="hamburger-menu" onclick="toggleMenu()">
-        <i class="fas fa-bars"></i>
+    <div class="page-wrapper">
+      <!-- Header -->
+      <header id="main-navigation">
+        {% block type %}{% endblock %}
+        <div class="hamburger-menu" onclick="toggleMenu()">
+          <i class="fas fa-bars"></i>
+        </div>
+        <nav class="navbar">
+          {% block navigation %}{% endblock %}
+          <a id="l1" href="{% url 'index' %}">LOGOUT</a>
+        </nav>
+      </header>
+
+      {% block sidebar %}{% endblock %}
+
+      <!-- Main Content -->
+      <div class="main-content">
+        {% block body_content %}{% endblock %}
       </div>
-      <nav class="navbar">
-        {% block navigation %}
-        {% endblock %}
-        <a id="l1" href="{% url 'index' %}">LOGOUT</a>
-      </nav>
-    </header>
 
-    {% block sidebar %}
-    {% endblock %}
-
-    {% block body_content %}
-    {% endblock %}
-
-    {% block footer %}
-    <footer>
-      <p>&copy; 2024 Counsel Accounting and Ledger Control. All rights reserved.</p>
-    </footer>
-    {% endblock %}
+      <!-- Footer -->
+      {% block footer %}
+      <footer>
+        <p>&copy; 2024 Counsel Accounting and Ledger Control. All rights reserved.</p>
+      </footer>
+      {% endblock %}
+    </div>
 
     {% block extra_scripts %}
     <script src="{% static 'scripts/custom.js' %}"></script>
