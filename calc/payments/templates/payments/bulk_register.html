@@ -1,22 +1,26 @@
 {% extends 'base.html' %}
 
-{% block title %}Bulk Register Advocates - C.A.L.C.{% endblock %}
+{% block title %}Bulk Register Advocates{% endblock %}
 
 {% block content %}
-<h2>Bulk Register Advocates</h2>
+<div class="container">
+    <h2>Bulk Register Advocates</h2>
 
-{% if messages %}
-    <div class="alert alert-warning">
+    {% if messages %}
         {% for message in messages %}
-            <p>{{ message }}</p>
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+                {{ message }}
+            </div>
         {% endfor %}
-    </div>
-{% endif %}
+    {% endif %}
 
-<form method="POST" enctype="multipart/form-data">
+    <a href="{% url 'download_advocate_template' %}" class="btn btn-primary">Download Advocate Template</a>
+
+    <form method="POST" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit" class="btn btn-primary">Upload CSV</button>
+    <button type="submit">Upload Advocates</button>
 </form>
-
+</div>
 {% endblock %}

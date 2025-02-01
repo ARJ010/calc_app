@@ -1,8 +1,7 @@
 from django.contrib import admin
-from .models import *
-# Register your models here.
+from .models import Advocate
+from django.contrib.auth.models import User
+
+
+
 admin.site.register(Advocate)
-admin.site.register(Payment)
-admin.site.register(MonthlyPaymentDue)
-
-
