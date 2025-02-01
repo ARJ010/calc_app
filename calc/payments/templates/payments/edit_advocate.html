@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Edit Advocate{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Edit Advocate Profile</h2>
+    
+    <!-- Form for Editing Advocate Profile -->
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <!-- User Details Section -->
+        <div class="card p-4 mb-4 shadow-sm">
+            <h4 class="mb-3">User Information</h4>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="{{ user_form.username.id_for_label }}" class="form-label">Username</label>
+                    {{ user_form.username|add_class:"form-control" }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="{{ user_form.email.id_for_label }}" class="form-label">Email</label>
+                    {{ user_form.email|add_class:"form-control" }}
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="{{ user_form.first_name.id_for_label }}" class="form-label">First Name</label>
+                    {{ user_form.first_name|add_class:"form-control" }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="{{ user_form.last_name.id_for_label }}" class="form-label">Last Name</label>
+                    {{ user_form.last_name|add_class:"form-control" }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Advocate Details Section -->
+        <div class="card p-4 mb-4 shadow-sm">
+            <h4 class="mb-3">Advocate Information</h4>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="{{ advocate_form.mobile_number.id_for_label }}" class="form-label">Mobile Number</label>
+                    {{ advocate_form.mobile_number|add_class:"form-control" }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="{{ advocate_form.date_of_birth.id_for_label }}" class="form-label">Date of Birth</label>
+                    {{ advocate_form.date_of_birth|add_class:"form-control" }}
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="{{ advocate_form.blood_group.id_for_label }}" class="form-label">Blood Group</label>
+                    {{ advocate_form.blood_group|add_class:"form-control" }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="{{ advocate_form.enrolment_no.id_for_label }}" class="form-label">Enrolment Number</label>
+                    {{ advocate_form.enrolment_no|add_class:"form-control" }}
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="{{ advocate_form.date_of_enrolment.id_for_label }}" class="form-label">Date of Enrolment</label>
+                    {{ advocate_form.date_of_enrolment|add_class:"form-control" }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="{{ advocate_form.bar_registration.id_for_label }}" class="form-label">Bar Registration Number</label>
+                    {{ advocate_form.bar_registration|add_class:"form-control" }}
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Address -->
+                <div class="col-md-4 mb-3">
+                    <label for="{{ advocate_form.address.id_for_label }}" class="form-label">Address</label>
+                    {{ advocate_form.address|add_class:"form-control" }}
+                </div>
+            
+                <!-- Joined Date and Profile Picture stacked -->
+                <div class="col-md-8">
+                    <div class="row">
+                        <!-- Joined Date -->
+                        <div class="col-md-12 mb-3">
+                            <label for="{{ advocate_form.joined_date.id_for_label }}" class="form-label">Joined Date</label>
+                            {{ advocate_form.joined_date|add_class:"form-control" }}
+                        </div>
+                        <!-- Profile Picture -->
+                        <div class="col-md-12 mb-3">
+                            <label for="{{ advocate_form.picture.id_for_label }}" class="form-label">Profile Picture</label>
+                            <div class="d-flex align-items-center">
+                                <!-- If there is an image, display it as a thumbnail -->
+                                {% if advocate_form.instance.picture %}
+                                    <img src="{{ advocate_form.instance.picture.url }}" class="img-thumbnail mr-3" width="100">
+                                {% endif %}
+                                <!-- File input with custom styling -->
+                                <input type="file" name="picture" class="form-control" id="{{ advocate_form.picture.id_for_label }}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+
+        <!-- Submit Button -->
+    <div class="d-flex justify-content-center gap-3 mt-4">
+        <!-- Update Button -->
+        <button type="submit" class="btn btn-primary btn-lg px-4 py-2">Update Advocate</button>
+      
+        <!-- Cancel Button -->
+        <a href="{% url 'advocate_list' %}" class="btn btn-outline-secondary btn-lg text-center w-auto">
+          Cancel
+        </a>
+      </div>
+    </form>
+</div>
+{% endblock %}

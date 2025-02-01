@@ -1,0 +1,294 @@
+{% extends 'base.html' %}
+{% load static %}  
+
+{% block title %}Advocate List{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Container Styling */
+    .advocate-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: center;
+    }
+
+    /* Landscape ID Card Style */
+    .advocate-card {
+        width: 400px;
+        height: 220px;
+        background: white;
+        border: 3px solid #0a398a; /* Blue border */
+        border-radius: 10px;
+        box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
+        display: flex;
+        overflow: hidden;
+        position: relative;
+    }
+
+    /* Header Styling */
+    .card-header {
+        background: #0a398a;
+        color: white;
+        padding: 5px;
+        font-size: 12px;
+        font-weight: bold;
+        text-transform: uppercase;
+        text-align: center;
+        width: 100%;
+        position: absolute;
+        top: 0;
+    }
+
+    /* Advocate Image */
+    .advocate-img {
+        width: 100px;
+        height: 130px;
+        border: 2px solid #ccc;
+        border-radius: 5px;
+        margin: 60px 10px;
+        object-fit: cover;
+    }
+
+    /* Details Section */
+    .card-body {
+        font-size: 13px;
+        padding: 60px 10px;
+        width: calc(100% - 130px); /* Adjust for image width */
+        text-align: left;
+    }
+
+    .header-p {
+        margin: 2px 0;
+    }
+
+    .card-body p {
+        margin: 5px 0;
+    }
+
+    /* Footer Styling */
+    .card-footer {
+        position: absolute;
+        bottom: -2px;
+        left: 60px;
+        width: 100%;
+        font-size: 10px;
+        font-weight: bold;
+        display: flex;
+        justify-content: space-between;
+        padding: 0 70px;
+    }
+
+    .signature, .chairman {
+        font-style: italic;
+    }
+
+    /* Buttons */
+    .btn-sm {
+        font-size: 12px;
+        padding: 3px 6px;
+    }
+
+    /* Button Container - Initially Hidden */
+.card-buttons {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: none;
+    gap: 10px;
+    z-index: 2;
+}
+
+/* Show Buttons and Blur Background on Hover */
+.advocate-card:hover .card-buttons {
+    display: flex;
+}
+
+/* Apply Blur Effect on Hover */
+.advocate-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.5); /* Light white overlay */
+    backdrop-filter: blur(5px); /* Apply blur */
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+/* Make Blur Visible on Hover */
+.advocate-card:hover::before {
+    opacity: 1;
+}
+
+/* Button Styling */
+.card-buttons a {
+    text-decoration: none;
+    font-size: 12px;
+    padding: 5px 10px;
+    border-radius: 5px;
+    color: white;
+    font-weight: bold;
+}
+
+.edit-btn {
+    background-color: #ffc107; /* Yellow */
+}
+
+.details-btn {
+    background-color: #007bff; /* Blue */
+}
+
+/* General Form Styles */
+
+/* Align the search input and button */
+.custom-search-input,
+.custom-search-btn {
+    height: 38px; /* Set equal height for both */
+}
+
+/* Style the search button */
+.custom-search-btn {
+    padding: 0.375rem 1rem; /* Adjust padding for a consistent look */
+    font-size: 1rem;
+    border-radius: 0.25rem;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Button hover effects */
+.custom-search-btn:hover {
+    background-color: #0069d9; /* Darker shade for hover */
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Style the search input */
+.custom-search-input {
+    font-size: 1rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: 0.25rem;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease;
+}
+
+/* Input hover effect */
+.custom-search-input:hover {
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Focus effect for the search input */
+.custom-search-input:focus {
+    border-color: #0069d9;
+    box-shadow: 0px 0px 5px rgba(0, 105, 217, 0.5);
+}
+
+
+.button-group {
+    display: flex;
+    gap: 10px;
+}
+
+/* Button Styling for Register and Bulk Add */
+.btn-register, .btn-bulk-add {
+    background-color: transparent;
+    color: #007bff;
+    border: 2px solid #007bff;
+    padding: 8px 20px;
+    font-size: 14px;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.btn-register:hover, .btn-bulk-add:hover {
+    background-color: #007bff;
+    color: white;
+    transform: scale(1.05);
+}
+
+.btn-bulk-add {
+    border-color: #28a745;
+    color: #28a745;
+}
+
+.btn-bulk-add:hover {
+    background-color: #28a745;
+    color: white;
+}
+
+
+
+</style>
+{% endblock %}
+
+{% block content %}
+<h2 class="text-center my-4">Advocate List</h2>
+
+<!-- Centered Container for Search Form -->
+<div class="d-flex justify-content-center mb-4">
+    <form method="get" action="" class="d-flex w-50">
+        <input type="text" name="search" class="form-control custom-search-input" placeholder="Search by Name or Enrolment No." value="{{ search_query }}">
+        <button type="submit" class="btn btn-primary ms-2 custom-search-btn">Search</button>
+    </form>
+</div>
+
+<!-- Centered Button Group -->
+<div class="text-center">
+    <a href="{% url 'register_advocate' %}" class="btn btn-register">Register Advocate</a>
+    <a href="{% url 'bulk_add_advocates' %}" class="btn btn-bulk-add">Bulk Add Advocates</a>
+    <a href="{% url 'export_advocates_csv' %}" class="btn btn-register">Download Advocate List (CSV)</a>
+</div>
+
+</div>
+<div class="container mt-5">
+<section id="all-advocates">
+
+    <!-- Advocate Cards -->
+    <div class="advocate-container">
+        {% for advocate in advocates %}
+        <div class="advocate-card">
+            <!-- Header -->
+            <div class="card-header">
+                <p class="header-p">THE BAR COUNCIL OF KERALA</p>
+                <small>(Statutory Body Under The Advocates Act 1961)</small>
+            </div>
+
+            <!-- Image & Details -->
+            <div class="d-flex">
+                <!-- Photo -->
+                <div>
+                    {% if advocate.picture %}
+                        <img src="{{ advocate.picture.url }}" class="advocate-img" alt="{{ advocate.name }}">
+                    {% else %}
+                        <img src="{% static 'default-avatar.webp' %}" class="advocate-img" alt="Default Avatar">
+                    {% endif %}
+                </div>
+
+                <!-- Details -->
+                <div class="card-body">
+                    <p><strong>Advocate:</strong> {{ advocate.user.get_full_name }}</p>
+                    <p><strong>Enrolment No.:</strong> {{ advocate.enrolment_no }}</p>
+                    <p><strong>Date of Enrolment:</strong> {{ advocate.date_of_enrolment }}</p>
+                    <p><strong>Valid Upto:</strong> {{ advocate.valid_upto }}</p>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="card-footer">
+                <p class="signature">Signature of Holder</p>
+                <p class="chairman">Chairman</p>
+            </div>
+
+            <!-- Hover Buttons -->
+            <div class="card-buttons">
+                <a href="{% url 'edit_advocate' advocate.id %}" class="edit-btn">Edit</a>
+                <a href="{% url 'advocate_details' advocate.id %}" class="details-btn">Details</a>
+            </div>  
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

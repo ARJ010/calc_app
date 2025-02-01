@@ -1,0 +1,204 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+
+{% block title %}Register Advocate{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2>Register Advocate</h2>
+  <form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    
+    <!-- User Form Section -->
+    <div class="card p-4 mb-4 shadow-sm">
+      <h4 class="mb-3">User Information</h4>
+
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label for="{{ user_form.username.id_for_label }}" class="form-label">Username</label>
+          {{ user_form.username|add_class:"form-control" }}
+          <div class="invalid-feedback">
+            {% for error in user_form.username.errors %}
+              <p>{{ error }}</p>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label for="{{ user_form.password.id_for_label }}" class="form-label">Password</label>
+            {{ user_form.password|add_class:"form-control" }}
+            <div class="invalid-feedback">
+              {% for error in user_form.password.errors %}
+                <p>{{ error }}</p>
+              {% endfor %}
+            </div>
+          </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6 mb-3">
+            <label for="{{ user_form.first_name.id_for_label }}" class="form-label">First Name</label>
+            {{ user_form.first_name|add_class:"form-control" }}
+            <div class="invalid-feedback">
+              {% for error in user_form.first_name.errors %}
+                <p>{{ error }}</p>
+              {% endfor %}
+            </div>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label for="{{ user_form.last_name.id_for_label }}" class="form-label">Last Name</label>
+          {{ user_form.last_name|add_class:"form-control" }}
+          <div class="invalid-feedback">
+            {% for error in user_form.last_name.errors %}
+              <p>{{ error }}</p>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6 mb-3">
+            <label for="{{ user_form.email.id_for_label }}" class="form-label">Email</label>
+            {{ user_form.email|add_class:"form-control" }}
+            <div class="invalid-feedback">
+              {% for error in user_form.email.errors %}
+                <p>{{ error }}</p>
+              {% endfor %}
+            </div>
+          </div>
+      </div>
+    </div>
+
+    <!-- Advocate Form Section -->
+    <div class="card p-4 mb-4 shadow-sm">
+      <h4 class="mb-3">Advocate Information</h4>
+
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label for="{{ advocate_form.mobile_number.id_for_label }}" class="form-label">Mobile Number</label>
+          {{ advocate_form.mobile_number|add_class:"form-control" }}
+          <div class="invalid-feedback">
+            {% for error in advocate_form.mobile_number.errors %}
+              <p>{{ error }}</p>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label for="{{ advocate_form.date_of_birth.id_for_label }}" class="form-label">Date of Birth</label>
+          {{ advocate_form.date_of_birth|add_class:"form-control" }}
+          <div class="invalid-feedback">
+            {% for error in advocate_form.date_of_birth.errors %}
+              <p>{{ error }}</p>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label for="{{ advocate_form.blood_group.id_for_label }}" class="form-label">Blood Group</label>
+          {{ advocate_form.blood_group|add_class:"form-control" }}
+          <div class="invalid-feedback">
+            {% for error in advocate_form.blood_group.errors %}
+              <p>{{ error }}</p>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label for="{{ advocate_form.enrolment_no.id_for_label }}" class="form-label">Enrolment No</label>
+          {{ advocate_form.enrolment_no|add_class:"form-control" }}
+          <div class="invalid-feedback">
+            {% for error in advocate_form.enrolment_no.errors %}
+              <p>{{ error }}</p>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label for="{{ advocate_form.date_of_enrolment.id_for_label }}" class="form-label">Date of Enrolment</label>
+          {{ advocate_form.date_of_enrolment|add_class:"form-control" }}
+          <div class="invalid-feedback">
+            {% for error in advocate_form.date_of_enrolment.errors %}
+              <p>{{ error }}</p>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label for="{{ advocate_form.bar_registration.id_for_label }}" class="form-label">Bar Registration</label>
+          {{ advocate_form.bar_registration|add_class:"form-control" }}
+          <div class="invalid-feedback">
+            {% for error in advocate_form.bar_registration.errors %}
+              <p>{{ error }}</p>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <!-- Address Field (Left Side) -->
+        <div class="col-md-6 mb-3">
+            <label for="{{ advocate_form.address.id_for_label }}" class="form-label">Address</label>
+            {{ advocate_form.address|add_class:"form-control" }}
+            <div class="invalid-feedback">
+                {% for error in advocate_form.address.errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+        </div>
+    
+        <!-- Right Side Column for Email, Joined Date, and Profile Picture -->
+        <div class="col-md-6">
+            <div class="row">
+                <!-- Email Field (Right Side) -->
+                <div class="col-md-12 mb-3">
+                    <label for="{{ advocate_form.email.id_for_label }}" class="form-label">Email</label>
+                    {{ advocate_form.email|add_class:"form-control" }}
+                    <div class="invalid-feedback">
+                        {% for error in advocate_form.email.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                </div>
+    
+                <!-- Joined Date Field (Right Side) -->
+                <div class="col-md-12 mb-3">
+                    <label for="{{ advocate_form.joined_date.id_for_label }}" class="form-label">Joined Date</label>
+                    {{ advocate_form.joined_date|add_class:"form-control" }}
+                    <div class="invalid-feedback">
+                        {% for error in advocate_form.joined_date.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                </div>
+    
+                <!-- Profile Picture Field (Right Side) -->
+                <div class="col-md-12 mb-3">
+                    <label for="{{ advocate_form.picture.id_for_label }}" class="form-label">Profile Picture</label>
+                    {{ advocate_form.picture|add_class:"form-control" }}
+                    <div class="invalid-feedback">
+                        {% for error in advocate_form.picture.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+     
+
+    <!-- Submit Button -->
+    <div class="d-flex justify-content-center gap-3 mt-4">
+        <!-- Register Button -->
+        <button type="submit" class="btn btn-primary btn-lg">Register Advocate</button>
+      
+        <!-- Cancel Button -->
+        <a href="{% url 'advocate_list' %}" class="btn btn-outline-secondary btn-lg text-center w-auto">
+          Cancel
+        </a>
+      </div>
+      
+  </form>
+</div>
+{% endblock %}

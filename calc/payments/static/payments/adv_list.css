@@ -1,0 +1,92 @@
+body {
+    background-color: #e7e7e7;
+}
+
+#main-navigation {
+    background-color: #390281;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+#all-advocates {
+    margin: 7rem auto;
+    width: 80%;
+    max-width: 60rem;
+}
+
+#all-advocates h2 {
+    text-align: center;
+    font-size: 2rem;
+    color: #2e2e2e;
+    margin: 3rem 0;
+}
+
+ul {
+    list-style: none;
+    max-width: 1200px;
+    width: 125%;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+    padding: 0;
+}
+
+.advocate img {
+    width: 7rem;
+    height: 7rem;
+    object-fit: cover;
+    border-radius: 50%;
+    margin: 10px auto;
+    display: block;
+}
+
+.advocate a {
+    height: 12rem;
+    width: 10rem;
+    transform-origin: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    border-radius: 12px;
+    background-color: white;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    transition: transform 0.2s ease;
+}
+
+.advocate a:hover {
+    transform: scale(1.05);
+}
+
+.advocate .post__content h3 {
+    font-size: 1rem;
+    color: #2e2e2e;
+    margin: 0.5rem 0;
+}
+
+.advocate .post__content p {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.alert {
+    padding: 20px;
+    background-color: #f44336;
+    color: white;
+}
+
+.closebtn {
+    margin-left: 15px;
+    color: white;
+    font-weight: bold;
+    float: right;
+    font-size: 22px;
+    line-height: 20px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.closebtn:hover {
+    color: black;
+}

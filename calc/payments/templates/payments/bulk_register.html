@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}Bulk Register Advocates{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Bulk Register Advocates</h2>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <a href="{% url 'download_advocate_template' %}" class="btn btn-primary">Download Advocate Template</a>
+
+    <form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Upload Advocates</button>
+</form>
+</div>
+{% endblock %}
