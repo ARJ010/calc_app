@@ -2,17 +2,11 @@
 
 {% block title %}
 {% if is_admin %}
-Home - CALC
-{% else %}
 Advocate Details
 {% endif %}
 {% endblock %}
 
 {% block content %}
-{% if is_admin %}
-<h1>Welcome to CALC</h1>
-<p class="lead">Counsel Accounting and Ledger Control (CALC) is designed to manage advocate details and monthly payments effectively.</p>
-{% else %}
     <div class="card shadow-lg border-0">
       <!-- Header -->
       <div class="card-header bg-primary text-white text-center py-3">
@@ -86,7 +80,7 @@ Advocate Details
             <p class="alert alert-warning">No payments made yet.</p>
           {% endif %}
         </div>
-
+        {% if is_admin %}
         <!-- Payment Form Section -->
         <div class="mt-5">
           <h5 class="text-primary fw-bold">Make a Payment</h5>
@@ -113,15 +107,14 @@ Advocate Details
             </div>
             <button type="submit" class="btn btn-primary mt-3">Make Payment</button>
           </form>
-        </div>
-      </div>
-
+        </div>      
+    </div>
       <!-- Footer -->
       <div class="card-footer bg-light text-center py-3">
         <a href="{% url 'advocate_list' %}" class="btn btn-outline-primary px-4">
           <i class="fas fa-arrow-left"></i> Back to List
         </a>
+        {% endif %}
       </div>
-    </div>
-{% endif %}
+    </div>  
 {% endblock %}
