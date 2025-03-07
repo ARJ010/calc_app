@@ -12,7 +12,7 @@ class CSVUploadForm(forms.Form):
 class AdvocateForm(forms.ModelForm):
     class Meta:
         model = Advocate
-        fields = ['mobile_number', 'date_of_birth', 'blood_group', 'enrolment_no', 'date_of_enrolment', 'bar_registration', 'email', 'address', 'joined_date', 'picture']
+        fields = ['mobile_number', 'date_of_birth', 'blood_group', 'enrolment_no', 'date_of_enrolment', 'bar_registration', 'due_amount', 'address', 'joined_date', 'picture']
 
 class UserForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput, required=True)

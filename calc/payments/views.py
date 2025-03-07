@@ -226,37 +226,47 @@ def export_advocates_csv(request):
 
 
 
+from django.utils import timezone
+
+from django.shortcuts import render, get_object_or_404, redirect
+from django.http import HttpResponse
+from decimal import Decimal
+from .models import Advocate, Payment
+
+from django.utils.timezone import now
+
 def make_payment(request, advocate_id):
-    advocate = Advocate.objects.get(id=advocate_id)
+    advocate = get_object_or_404(Advocate, id=advocate_id)
+
     if request.method == 'POST':
-        amount = float(request.POST['amount'])
-        months = int(request.POST['months'])
-        receipt_number = request.POST['receipt_number']
-        payment_date = datetime.now().date()
+        amount = Decimal(request.POST.get('amount'))  # Get the payment amount
+        payment_date = request.POST.get('payment_date', now())  # Default to current time if not provided
 
-        # Create a Payment record
-        payment = Payment.objects.create(
+        # Get the current month and year
+        current_month = datetime.now().month
+        current_year = datetime.now().year
+        
+        # Assume the payment covers from January to the current month
+        start_month = f"{current_year}-{1:02d}-01"  # Start from January
+        end_month = f"{current_year}-{current_month:02d}-01"  # End at the current month
+
+        # Create Payment object
+        payment = Payment(
             advocate=advocate,
-            payment_date=payment_date,
             amount=amount,
-            months_paid_for=months,
-            start_month=payment_date,
-            end_month=payment_date,
-            status='Paid',
-            receipt_number=receipt_number
+            start_month=start_month,
+            end_month=end_month,
+            payment_date=payment_date,  # Ensure this is set
+            status="Completed",
+            receipt_number=request.POST.get('receipt_number')
         )
+        
+        payment.save()
 
-        # Update MonthlyPaymentDue records
-        for month in range(1, months + 1):
-            due_month = MonthlyPaymentDue.objects.filter(
-                advocate=advocate, due_month__month=month, due_month__year=payment_date.year
-            ).first()
-            if due_month:
-                due_month.is_paid = True
-                due_month.save()
+        # Calculate and update due amount for the advocate
+        advocate.due_amount -= amount
+        advocate.save()
 
-        messages.success(request, 'Payment recorded successfully!')
-        return redirect('advocate_details', advocate_id=advocate.id)
+        return redirect('advocate_details', advocate_id=advocate.id)  # Redirect to the advocate details page
 
-    return render(request, 'advocate_details.html', {'advocate': advocate})
-
+    return HttpResponse("Invalid request method.")

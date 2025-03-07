@@ -153,8 +153,8 @@
             <div class="row">
                 <!-- Email Field (Right Side) -->
                 <div class="col-md-12 mb-3">
-                    <label for="{{ advocate_form.email.id_for_label }}" class="form-label">Email</label>
-                    {{ advocate_form.email|add_class:"form-control" }}
+                    <label for="{{ advocate_form.email.id_for_label }}" class="form-label">Due Amount</label>
+                    {{ advocate_form.due_amount|add_class:"form-control" }}
                     <div class="invalid-feedback">
                         {% for error in advocate_form.email.errors %}
                             <p>{{ error }}</p>
