@@ -105,8 +105,13 @@ def advocate_detail(request, advocate_id):
     # Fetch the advocate by primary key (pk) or any other unique identifier
     advocate = get_object_or_404(Advocate, id=advocate_id)
     
-    # Render the template and pass the advocate object
-    return render(request, 'payments/advocate_details.html', {'advocate': advocate})
+    advocate_dues_count = advocate.monthly_dues.all().count()
+    total_amount_due = advocate_dues_count * 100  # ₹100 per due
+
+    return render(request, 'payments/advocate_details.html', {
+        'advocate': advocate,
+        'total_amount_due': total_amount_due
+    })
 
 
 
@@ -235,38 +240,49 @@ from .models import Advocate, Payment
 
 from django.utils.timezone import now
 
+
 def make_payment(request, advocate_id):
     advocate = get_object_or_404(Advocate, id=advocate_id)
 
     if request.method == 'POST':
-        amount = Decimal(request.POST.get('amount'))  # Get the payment amount
-        payment_date = request.POST.get('payment_date', now())  # Default to current time if not provided
-
-        # Get the current month and year
+        amount = Decimal(request.POST.get('amount'))  # Payment amount
+        payment_date = request.POST.get('payment_date', now())  # Default to now
         current_month = datetime.now().month
         current_year = datetime.now().year
-        
-        # Assume the payment covers from January to the current month
-        start_month = f"{current_year}-{1:02d}-01"  # Start from January
-        end_month = f"{current_year}-{current_month:02d}-01"  # End at the current month
 
-        # Create Payment object
-        payment = Payment(
-            advocate=advocate,
-            amount=amount,
-            start_month=start_month,
-            end_month=end_month,
-            payment_date=payment_date,  # Ensure this is set
-            status="Completed",
-            receipt_number=request.POST.get('receipt_number')
-        )
-        
-        payment.save()
+        # Calculate total due if any
+        total_due = advocate.due_amount
+        monthly_fee = Decimal(100)
 
-        # Calculate and update due amount for the advocate
-        advocate.due_amount -= amount
+        # If Onam month (assume September), add extra ₹500
+        if current_month == 9:
+            monthly_fee += Decimal(500)
+
+        # Check if payment is covering due
+        if amount >= total_due:
+            amount -= total_due
+            advocate.due_amount = 0  # Clear all past dues
+        else:
+            advocate.due_amount -= amount
+            amount = 0  # Full payment used to offset dues
+
+        # If any amount remains after paying dues, mark the current month's payment
+        if amount >= monthly_fee:
+            payment = Payment(
+                advocate=advocate,
+                amount=monthly_fee,
+                start_month=f"{current_year}-{current_month:02d}-01",
+                end_month=f"{current_year}-{current_month:02d}-01",
+                payment_date=payment_date,
+                status="Completed",
+            )
+            payment.save()
+            amount -= monthly_fee  # Deduct the monthly fee from the remaining amount
+        else:
+            # If no payment is made for this month, add to due
+            advocate.due_amount += monthly_fee
+
         advocate.save()
-
-        return redirect('advocate_details', advocate_id=advocate.id)  # Redirect to the advocate details page
+        return redirect('advocate_details', advocate_id=advocate.id)
 
     return HttpResponse("Invalid request method.")

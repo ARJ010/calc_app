@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils.timezone import now
 from datetime import timedelta
+from datetime import date
+
 
 class Advocate(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='advocate', null=True, blank=True)
@@ -42,28 +44,20 @@ class Advocate(models.Model):
         return due_amount
 
 class Payment(models.Model):
-    advocate = models.ForeignKey(Advocate, on_delete=models.CASCADE)
-    payment_date = models.DateField(default=now)
+    advocate = models.ForeignKey(Advocate, on_delete=models.CASCADE, related_name='payments')
     amount = models.DecimalField(max_digits=10, decimal_places=2)
-    start_month = models.DateField()  # The first month covered by this payment
-    end_month = models.DateField()  # The last month covered by this payment
-    
-    STATUS_CHOICES = [
-        ("Pending", "Pending"),
-        ("Completed", "Completed"),
-        ("Overdue", "Overdue"),
-    ]
-    
-    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default="Pending")
-    receipt_number = models.CharField(max_length=50, blank=True, null=True)
+    start_month = models.DateField()  # The month this payment covers
+    end_month = models.DateField()    # Can be same as start_month or a later month
+    payment_date = models.DateField(default=date.today)
+    status = models.CharField(max_length=20, choices=[('Completed', 'Completed'), ('Pending', 'Pending')], default='Completed')
 
     def __str__(self):
-        return f"{self.advocate.user.get_full_name() if self.advocate.user else 'Unknown Advocate'} - {self.payment_date}"
+        return f"{self.advocate.user.get_full_name()} - ₹{self.amount} on {self.payment_date}"
 
 class MonthlyPaymentDue(models.Model):
-    advocate = models.ForeignKey(Advocate, on_delete=models.CASCADE)
-    due_month = models.DateField()
-    is_paid = models.BooleanField(default=False)
+    advocate = models.ForeignKey(Advocate, on_delete=models.CASCADE, related_name='monthly_dues')
+    month = models.DateField()  # The month this due is for
+    amount_due = models.DecimalField(max_digits=10, decimal_places=2, default=100)
 
     def __str__(self):
-        return f"{self.advocate.user.get_full_name() if self.advocate.user else 'Unknown Advocate'} - {self.due_month}"
+        return f"{self.advocate.name} - ₹{self.amount_due} due for {self.month.strftime('%B %Y')}"
