@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<h2>Admin Dashboard</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Advocate</th>
+            <th>Total Due</th>
+            <th>Pending Months</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in pending_dues %}
+            <tr>
+                <td>{{ item.advocate.user.get_full_name }}</td>
+                <td>₹{{ item.total_due }}</td>
+                <td>
+                    <ul>
+                    {% for due in item.dues %}
+                        <li>{{ due.due_month|date:"F Y" }}</li>
+                    {% endfor %}
+                    </ul>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

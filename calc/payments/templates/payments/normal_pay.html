@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+  <!-- Flash Messages -->
+  {% if messages %}
+    <div class="mt-2">
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <div class="card shadow-lg border-0">
+    <!-- Header -->
+    <div class="card-header bg-primary text-white text-center py-3">
+      <h3 class="mb-0">Normal Payment - {{ name }}</h3>
+    </div>
+
+    <!-- Card Body -->
+    <div class="card-body px-4 py-4">
+      <form method="POST">
+        {% csrf_token %}
+
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label for="start_year" class="form-label">Start Year:</label>
+            <input type="number" name="start_year" id="start_year" class="form-control" min="2000" value="{{ current_year }}" required>
+          </div>
+          <div class="col-md-6">
+            <label for="start_month" class="form-label">Start Month:</label>
+            <select name="start_month" id="start_month" class="form-select" required>
+              {% for month in months %}
+                <option value="{{ month.0 }}" {% if month.0 == current_month %}selected{% endif %}>{{ month.1 }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label for="end_year" class="form-label">End Year:</label>
+            <input type="number" name="end_year" id="end_year" class="form-control" min="2000" value="{{ current_year }}" required>
+          </div>
+          <div class="col-md-6">
+            <label for="end_month" class="form-label">End Month:</label>
+            <select name="end_month" id="end_month" class="form-select" required>
+              {% for month in months %}
+                <option value="{{ month.0 }}" {% if month.0 == current_month %}selected{% endif %}>{{ month.1 }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <!-- Month Count Info -->
+        <div id="month-count" class="mb-3 text-muted text-center small">
+          <!-- JS will inject text here -->
+        </div>
+
+        <div class="text-center">
+          <button type="submit" class="btn btn-success px-4">
+            <i class="fas fa-rupee-sign"></i> Pay Now
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Footer -->
+    <div class="card-footer bg-light text-center py-3">
+      <a href="{% url 'advocate_details' advocate.id %}" class="btn btn-outline-primary px-4">
+        <i class="fas fa-arrow-left"></i> Back to Advocate Details
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- JS to show number of months -->
+<script>
+  function calculateMonths() {
+    const startYear = parseInt(document.getElementById('start_year').value);
+    const startMonth = parseInt(document.getElementById('start_month').value);
+    const endYear = parseInt(document.getElementById('end_year').value);
+    const endMonth = parseInt(document.getElementById('end_month').value);
+
+    const start = new Date(startYear, startMonth - 1);
+    const end = new Date(endYear, endMonth - 1);
+
+    const diffMonths = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth()) + 1;
+
+    const msgContainer = document.getElementById('month-count');
+
+    if (diffMonths > 0) {
+      msgContainer.innerText = `You are about to pay for ${diffMonths} month${diffMonths > 1 ? 's' : ''} (₹${diffMonths * 100}).`;
+    } else {
+      msgContainer.innerText = '';
+    }
+  }
+
+  document.querySelectorAll('#start_year, #start_month, #end_year, #end_month').forEach(el => {
+    el.addEventListener('change', calculateMonths);
+  });
+
+  window.onload = calculateMonths;
+</script>
+{% endblock %}

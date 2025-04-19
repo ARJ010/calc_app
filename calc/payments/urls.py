@@ -12,5 +12,11 @@ urlpatterns = [
     path('export/advocates/', views.export_advocates_csv, name='export_advocates_csv'),
     path('edit_profile/<int:advocate_id>/', views.edit_advocate, name='edit_advocate'),
     path('download/', views.download_advocate_template, name='download_advocate_template'),
-    path('advocate/make_payment/<int:advocate_id>/', views.make_payment, name='make_payment'),
+    path('check-dues/', views.check_and_update_dues, name='check_dues'),
+    path('advocate/<int:advocate_id>/debt-pay/', views.debt_pay, name='debt_pay'),
+    path('advocate/<int:advocate_id>/normal-pay/', views.normal_pay, name='normal_pay'),
+    path('payment-history/', views.payment_history, name='payment_history'),
+    path('change-username-password/', views.change_username_password, name='change_username_password'),
+    path('reset_advocate_credentials/<str:advocate_id>/', views.reset_advocate_credentials, name='reset_advocate_credentials'),
+
 ]   

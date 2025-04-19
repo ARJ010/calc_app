@@ -25,15 +25,12 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
-                    {% if is_admin %}
+                    {% if user.is_superuser %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'advocate_list' %}">Advocates</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'bulk_add_advocates' %}">Bulk Register</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Payment History</a>
+                        <a class="nav-link" href="{% url 'payment_history' %}">Payment History</a>
                     </li>
                     {% endif %}
                 </ul>
@@ -46,7 +43,7 @@
                         <form  method="post" action="{% url 'logout' %}">
                             {% csrf_token %}
                             <button class="logout" type="submit">Logout</button>
-                          </form>
+                        </form>
                     </li>
                 </ul>
                 {% else %}
@@ -73,7 +70,6 @@
         <!-- Content will be injected here -->
         {% endblock %}
     </div>
-
 
     <!-- Footer -->
     <footer class="bg-dark text-white text-center py-3 mt-4">
