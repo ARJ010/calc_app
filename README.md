@@ -1,14 +1,39 @@
-# CALC (Counsel Accounting and Ledger Control)
+# ⚖️ CALC - Counsel Accounting and Ledger Control
 
-**CALC** is a Django-based web application developed for the Hosdurg Bar Association. It aims to manage advocate details and track their monthly payments to the association. The project helps in maintaining an organized accounting system and provides features for payment tracking and reminders.
+**CALC** (Counsel Accounting and Ledger Control) is a Django-based web application developed for the **Hosdurg Bar Association**. It is designed to manage advocate details and systematically track their monthly payments to the association.
 
-## Features
+---
 
-- **Advocate Management:** Store and manage details of advocates, including registration number, contact information, and address.
-- **Payment Tracking:** Record payments made by advocates, including support for paying multiple months at once.
-- **Monthly Dues Management:** Automatically track monthly dues for each advocate, and mark payments as completed.
-- **Automated Reminders:** Send notifications to advocates for overdue payments.
-- **Admin Dashboard:** Provide an interface for administrators to manage advocates and monitor payments.
+## 🚀 Features
+
+- 🧑‍⚖️ **Advocate Management**
+  - Register and manage advocate profiles.
+  - Store personal and professional details.
+  - CSV-based bulk upload/download support.
+
+- 💰 **Payment Tracking**
+  - Track mandatory ₹100 monthly payments.
+  - Special annual payment logic (e.g. additional ₹500 in September).
+  - Automatic due tracking from January onward.
+
+- 🗓 **Dues Management**
+  - "Check Dues" feature to record unpaid months.
+  - Displays real-time pending dues and updates `due_amount` field.
+
+- 🧾 **Payment System**
+  - **Normal Pay**: Advance or current month payments.
+  - **Debt Pay**: Clear outstanding dues.
+  - Serial numbers formatted as `MM-YYYY.n` for payment tracking.
+
+- 📄 **Payment History**
+  - Advocate-specific payment breakdown.
+  - Full ledger with filters (e.g. paid/unpaid for a specific month).
+
+- 🧠 **Admin Panel**
+  - Fully functional Django admin with secure login.
+  - Edit advocates, payments, and due entries with ease.
+
+---
 
 ## Installation
 
