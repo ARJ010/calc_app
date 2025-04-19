@@ -88,3 +88,9 @@ This project is licensed under the MIT License. See the `LICENSE` file for more 
 
 - Developed by Abhinav Raj for the Hosdurg Bar Association.
 - Special thanks to the members of the association for their support and feedback.
+
+## Contact
+
+Developed by **Abhinav Raj**  
+Feel free to reach out via [LinkedIn](https://www.linkedin.com/in/arj010/) or [Email](mailto:abhinavmuzhakom@gmail.com) for any questions or feedback.
+
