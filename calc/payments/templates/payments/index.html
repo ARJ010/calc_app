@@ -47,6 +47,12 @@
             <p><strong>Due Amount:</strong> ₹{{ advocate.due_amount }}</p>
             <hr>
           </div>
+
+          <div class="d-flex justify-content-start mt-3">
+            <a href="{% url 'change_username_password' %}" class="btn btn-danger me-3">
+              <i class="fas fa-credit-card"></i> Edit
+            </a>
+          </div>
         </div>
       </div>
 
@@ -105,12 +111,6 @@
       </div>
     </div>
 
-    <!-- Footer -->
-    <div class="card-footer bg-light text-center py-3">
-      <a href="{% url 'advocate_list' %}" class="btn btn-outline-primary px-4">
-        <i class="fas fa-arrow-left"></i> Back to List
-      </a>
-    </div>
   </div>
 </div>
 {% endblock %}

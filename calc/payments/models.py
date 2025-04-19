@@ -35,7 +35,7 @@ class Advocate(models.Model):
     due_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)  # ₹ value
 
     
-    picture = models.ImageField(upload_to='media/advocate_pictures/', blank=True)
+    picture = models.ImageField(upload_to='static/images/user', blank=True)
 
     def __str__(self):
         return self.user.get_full_name() if self.user else f"Advocate {self.enrolment_no}"

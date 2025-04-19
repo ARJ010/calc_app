@@ -16,5 +16,7 @@ urlpatterns = [
     path('advocate/<int:advocate_id>/debt-pay/', views.debt_pay, name='debt_pay'),
     path('advocate/<int:advocate_id>/normal-pay/', views.normal_pay, name='normal_pay'),
     path('payment-history/', views.payment_history, name='payment_history'),
+    path('change-username-password/', views.change_username_password, name='change_username_password'),
+    path('reset_advocate_credentials/<str:advocate_id>/', views.reset_advocate_credentials, name='reset_advocate_credentials'),
 
 ]   
