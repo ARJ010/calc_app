@@ -1,4 +1,10 @@
+![CMS Icon](calc.png)
+
 # ⚖️ CALC - Counsel Accounting and Ledger Control
+![Django](https://img.shields.io/badge/Django-3.2-brightgreen.svg)
+![Python](https://img.shields.io/badge/Python-3.9-blue.svg)
+![SQLite](https://img.shields.io/badge/SQLite-3.35.5-lightgrey.svg)
+![License](https://img.shields.io/badge/License-MIT-green.svg)
 
 **CALC** (Counsel Accounting and Ledger Control) is a Django-based web application developed for the **Hosdurg Bar Association**. It is designed to manage advocate details and systematically track their monthly payments to the association.
 
