@@ -102,15 +102,17 @@ def edit_advocate(request, advocate_id):
 
 
 def advocate_detail(request, advocate_id):
-    # Fetch the advocate by primary key (pk) or any other unique identifier
     advocate = get_object_or_404(Advocate, id=advocate_id)
-    
-    advocate_dues_count = advocate.monthly_dues.all().count()
-    total_amount_due = advocate_dues_count * 100  # ₹100 per due
+    name = advocate.user.first_name + " " + advocate.user.last_name
+
+    due_entries = MonthlyPaymentDue.objects.filter(advocate=advocate, paid=False).order_by('year', 'month')
+    recent_payments = Payment.objects.filter(advocate=advocate).order_by('-payment_date')[:10]
 
     return render(request, 'payments/advocate_details.html', {
         'advocate': advocate,
-        'total_amount_due': total_amount_due
+        'name':name,
+        'due_entries': due_entries,
+        'recent_payments': recent_payments
     })
 
 
@@ -231,58 +233,308 @@ def export_advocates_csv(request):
 
 
 
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
 from django.utils import timezone
+from .models import Advocate, MonthlyPaymentDue, Payment
+from datetime import datetime, timedelta
+from calendar import monthrange
+from django.db import IntegrityError
 
-from django.shortcuts import render, get_object_or_404, redirect
-from django.http import HttpResponse
+
+def check_and_update_dues(request):
+    today = timezone.now()
+    current_month = today.month
+    current_year = today.year
+
+    # Only allow checking and updating dues if the current year is 2025 and the current date is April or later
+    if current_year == 2025:
+        # Format current_month as a 2-digit string
+        current_month_str = f"{current_month:02d}"
+
+        # Check if dues have already been checked for the current month and year
+        if MonthlyPaymentDue.objects.filter(year=current_year, month=current_month_str).exists():
+            messages.warning(request, "The monthly dues have already been checked for this month.")
+            return redirect('advocate_list')  # Redirect to a page listing all advocates
+
+        # Loop through the months from April to the current month and year
+        for month in range(4, current_month + 1):  # Start from April (month 4)
+            month_str = f"{month:02d}"
+
+            # Check for advocates who have not paid for this month and create MonthlyPaymentDue entries
+            advocates = Advocate.objects.all()
+            for advocate in advocates:
+                total_paid = Payment.objects.filter(advocate=advocate, year=current_year, month=month_str).aggregate(Sum('amount'))['amount__sum'] or Decimal('0.00')
+                
+                if total_paid < Decimal('100.00'):  # Example, assuming ₹100 is the required monthly payment
+                    if not MonthlyPaymentDue.objects.filter(advocate=advocate, month=month_str, year=current_year).exists():
+                        try:
+                            amount_due = Decimal('100.00')
+                            if month == 9:  # If the month is September, charge ₹600
+                                amount_due = Decimal('600.00')
+
+                            MonthlyPaymentDue.objects.create(
+                                advocate=advocate,
+                                month=month_str,
+                                year=current_year,
+                                amount=amount_due,
+                                paid=False
+                            )
+
+                            # Only update due_amount if the advocate was added to MonthlyPaymentDue
+                            advocate.due_amount += amount_due
+                            advocate.save()
+
+                        except IntegrityError:
+                            messages.error(request, f"Error: Could not create due entry for {advocate.user.first_name}.")
+
+        messages.success(request, f"Monthly dues for {current_month_str}/{current_year} have been checked and updated successfully.")
+        return redirect('advocate_list')  # Redirect to a page listing all advocates
+
+    # Format current_month as a 2-digit string
+    current_month_str = f"{current_month:02d}"
+
+    # Check if dues have already been checked for the current month and year
+    if MonthlyPaymentDue.objects.filter(year=current_year, month=current_month_str).exists():
+        messages.warning(request, "The monthly dues have already been checked for this month.")
+        return redirect('advocate_list')  # Redirect to a page listing all advocates
+
+    # Loop through the months from April to the current month and year
+    for month in range(1, current_month + 1):  # Start from April (month 4)
+        month_str = f"{month:02d}"
+
+        # Check for advocates who have not paid for this month and create MonthlyPaymentDue entries
+        advocates = Advocate.objects.all()
+        for advocate in advocates:
+            total_paid = Payment.objects.filter(advocate=advocate, year=current_year, month=month_str).aggregate(Sum('amount'))['amount__sum'] or Decimal('0.00')
+            
+            if total_paid < Decimal('100.00'):  # Example, assuming ₹100 is the required monthly payment
+                if not MonthlyPaymentDue.objects.filter(advocate=advocate, month=month_str, year=current_year).exists():
+                    try:
+                        amount_due = Decimal('100.00')
+                        if month == 9:  # If the month is September, charge ₹600
+                            amount_due = Decimal('600.00')
+
+                        MonthlyPaymentDue.objects.create(
+                            advocate=advocate,
+                            month=month_str,
+                            year=current_year,
+                            amount=amount_due,
+                            paid=False
+                        )
+
+                        # Only update due_amount if the advocate was added to MonthlyPaymentDue
+                        advocate.due_amount += amount_due
+                        advocate.save()
+
+                    except IntegrityError:
+                        messages.error(request, f"Error: Could not create due entry for {advocate.user.first_name}.")
+
+    messages.success(request, f"Monthly dues for {current_month_str}/{current_year} have been checked and updated successfully.")
+    return redirect('advocate_list')  # Redirect to a page listing all advocates
+
 from decimal import Decimal
-from .models import Advocate, Payment
-
-from django.utils.timezone import now
+from django.db.models import Sum
 
 
-def make_payment(request, advocate_id):
+def debt_pay(request, advocate_id):
     advocate = get_object_or_404(Advocate, id=advocate_id)
+    name = advocate.user.first_name + " " + advocate.user.last_name
+    unpaid_dues = MonthlyPaymentDue.objects.filter(advocate=advocate, paid=False).order_by('year', 'month')
+
+    # Calculate the total unpaid dues
+    total_unpaid_dues = unpaid_dues.aggregate(Sum('amount'))['amount__sum'] or Decimal('0.00')
+
+    show_extra_due = advocate.due_amount > total_unpaid_dues
 
     if request.method == 'POST':
-        amount = Decimal(request.POST.get('amount'))  # Payment amount
-        payment_date = request.POST.get('payment_date', now())  # Default to now
-        current_month = datetime.now().month
-        current_year = datetime.now().year
+        selected_due_ids = request.POST.getlist('due_ids')
+        extra_due_amount = request.POST.get('extra_due', '0').strip()
+        total_paid = Decimal('0.00')
 
-        # Calculate total due if any
-        total_due = advocate.due_amount
-        monthly_fee = Decimal(100)
+        # Handle selected MonthlyPaymentDue entries
+        for due_id in selected_due_ids:
+            due_entry = MonthlyPaymentDue.objects.filter(id=due_id, advocate=advocate, paid=False).first()
+            if due_entry:
+                month_str = f"{int(due_entry.month):02d}"
+                serial = f"{month_str}-{due_entry.year}.debt"
+                
+                Payment.objects.create(
+                    advocate=advocate,
+                    amount=due_entry.amount,
+                    month=month_str,
+                    year=due_entry.year,
+                    serial_number=serial
+                )
 
-        # If Onam month (assume September), add extra ₹500
-        if current_month == 9:
-            monthly_fee += Decimal(500)
+                due_entry.paid = True
+                due_entry.save()
 
-        # Check if payment is covering due
-        if amount >= total_due:
-            amount -= total_due
-            advocate.due_amount = 0  # Clear all past dues
-        else:
-            advocate.due_amount -= amount
-            amount = 0  # Full payment used to offset dues
+                total_paid += due_entry.amount
 
-        # If any amount remains after paying dues, mark the current month's payment
-        if amount >= monthly_fee:
-            payment = Payment(
+                # Reduce the due_amount in the advocate's profile
+                advocate.due_amount -= due_entry.amount
+                advocate.save()
+
+        # Handle partial due_amount payment
+        try:
+            extra_amount = Decimal(extra_due_amount)
+        except:
+            extra_amount = Decimal('0.00')
+
+        if extra_amount > 0 and advocate.due_amount > 0:
+            actual_deducted = min(extra_amount, advocate.due_amount)
+            today = timezone.now()
+            month_str = f"{today.month:02d}"
+            year = today.year
+            serial = f"{month_str}-{year}.debt-extra"
+
+            Payment.objects.create(
                 advocate=advocate,
-                amount=monthly_fee,
-                start_month=f"{current_year}-{current_month:02d}-01",
-                end_month=f"{current_year}-{current_month:02d}-01",
-                payment_date=payment_date,
-                status="Completed",
+                amount=actual_deducted,
+                month=month_str,
+                year=year,
+                serial_number=serial
             )
-            payment.save()
-            amount -= monthly_fee  # Deduct the monthly fee from the remaining amount
-        else:
-            # If no payment is made for this month, add to due
-            advocate.due_amount += monthly_fee
 
-        advocate.save()
+            advocate.due_amount -= actual_deducted
+            advocate.save()
+
+            total_paid += actual_deducted
+
+        if total_paid > 0:
+            messages.success(request, f"Successfully paid ₹{total_paid} for {advocate.user.first_name}.")
+        else:
+            messages.warning(request, "No dues selected or amount entered.")
+
         return redirect('advocate_details', advocate_id=advocate.id)
 
-    return HttpResponse("Invalid request method.")
+    return render(request, 'payments/debt_pay.html', {
+        'advocate': advocate,
+        'name':name,
+        'unpaid_dues': unpaid_dues,
+        'show_extra_due': show_extra_due  # Pass the flag to the template
+    })
+
+
+
+
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import Advocate, Payment
+from django.contrib import messages
+from django.utils import timezone
+from datetime import datetime
+import calendar
+
+# View for Normal Pay with start and end month/year
+def normal_pay(request, advocate_id):
+    advocate = get_object_or_404(Advocate, id=advocate_id)
+    name = advocate.user.first_name + " " + advocate.user.last_name
+
+    # Get current year and month
+    current_year = datetime.now().year
+    current_month = datetime.now().month
+
+    # List of months for the dropdown menu
+    months = [(i, calendar.month_name[i]) for i in range(1, 13)]
+
+    if request.method == "POST":
+        start_month = int(request.POST['start_month'])
+        start_year = int(request.POST['start_year'])
+        end_month = int(request.POST['end_month'])
+        end_year = int(request.POST['end_year'])
+
+        start_date = datetime(start_year, start_month, 1)
+        end_date = datetime(end_year, end_month, 1)
+
+        # Ensure the end date is not before the start date
+        if start_date > end_date:
+            messages.error(request, "End date cannot be before the start date.")
+            return redirect('normal_pay', advocate_id=advocate.id)
+
+        # Ensure that the end date is not before the current date
+        current_date = datetime(current_year, current_month, 1)
+        if end_date < current_date:
+            messages.error(request, "End date cannot be earlier than the current month.")
+            return redirect('normal_pay', advocate_id=advocate.id)
+
+        # Ensure no duplicate month-year pairs
+        existing_payments = Payment.objects.filter(advocate=advocate)
+        existing_month_years = {(payment.month, payment.year) for payment in existing_payments}
+
+        # Start adding payments month by month
+        current_date = start_date
+        serial_number_counter = 1  # Initialize the counter for serial numbers
+
+        while current_date <= end_date:
+            month_str = current_date.strftime('%m')  # Format the month to MM
+            year_str = current_date.year
+
+            # Check if the month-year pair already exists
+            if (month_str, year_str) in existing_month_years:
+                messages.error(request, f"Payment for {calendar.month_name[current_date.month]} {current_date.year} already exists.")
+                return redirect('normal_pay', advocate_id=advocate.id)
+
+            # Create a unique serial number, e.g., 'MM-YYYY.1'
+            serial_number = f"{month_str}-{year_str}.{serial_number_counter}"
+
+            # Create and save the payment
+            payment = Payment(
+                advocate=advocate,
+                amount=100.00,  # ₹100 per month (change as needed)
+                month=month_str,
+                year=year_str,
+                serial_number=serial_number,
+                payment_date=timezone.now()
+            )
+            payment.save()
+
+            # Increment serial number and move to the next month
+            serial_number_counter += 1
+            if current_date.month == 12:
+                current_date = datetime(current_date.year + 1, 1, 1)
+            else:
+                current_date = datetime(current_date.year, current_date.month + 1, 1)
+
+        messages.success(request, "Payments created successfully for the selected months.")
+        return redirect('advocate_details', advocate_id=advocate.id)
+
+    return render(request, 'payments/normal_pay.html', {
+        'advocate': advocate, 
+        'name':name,
+        'months': months,
+        'current_year': current_year, 
+        'current_month': current_month
+    })
+
+
+from django.shortcuts import render
+from django.utils import timezone
+from .models import Advocate, Payment
+
+def payment_history(request):
+    current_month = timezone.now().month
+    current_year = timezone.now().year
+
+    filter_option = request.GET.get("filter", "all")
+
+    if filter_option == "paid_this_month":
+        payments = Payment.objects.filter(month=current_month, year=current_year)
+        advocates = Advocate.objects.filter(id__in=payments.values_list('advocate_id', flat=True))
+    elif filter_option == "not_paid_this_month":
+        paid_ids = Payment.objects.filter(month=current_month, year=current_year).values_list('advocate_id', flat=True)
+        advocates = Advocate.objects.exclude(id__in=paid_ids)
+        payments = Payment.objects.filter(advocate__in=advocates)
+    else:
+        payments = Payment.objects.all()
+        advocates = Advocate.objects.all()
+
+    context = {
+        'payments': payments.order_by('-year', '-month'),
+        'advocates': advocates,
+        'filter_option': filter_option,
+        'current_month': current_month,
+        'current_year': current_year,
+    }
+
+    return render(request, 'payments/history.html', context)

@@ -1,134 +1,126 @@
 {% extends 'base.html' %}
-
-{% block title %}Advocate Details{% endblock %}
-
 {% block content %}
-  <div class="container mt-5">
-    <div class="card shadow-lg border-0">
-      <!-- Header -->
-      <div class="card-header bg-primary text-white text-center py-3">
-        <h3 class="mb-0">Advocate Profile</h3>
-      </div>
-      
-      <!-- Card Body -->
-      <div class="card-body px-4 py-4">
-        <div class="row">
-          <!-- Profile Picture -->
-          <div class="col-md-5 text-center">
-            {% if advocate.picture %}
-              <img src="{{ advocate.picture.url }}" class="img-thumbnail shadow-sm" 
-                   alt="Advocate's Picture" width="230" height="300" 
-                   style="border-radius: 10px; object-fit: cover;">
-            {% else %}
-              <div class="alert alert-secondary text-center">No profile picture available</div>
-            {% endif %}
-          </div>
+<div class="container mt-4">
+  <div class="card shadow-lg border-0">
+    <!-- Header -->
+    <div class="card-header bg-primary text-white text-center py-3">
+      <h3 class="mb-0">Advocate Profile - {{ name }}</h3>
+    </div>
 
-          <!-- Advocate Details -->
-          <div class="col-md-7">
-            <h4 class="text-primary fw-bold">{{ advocate.name }}</h4>
+    <!-- Card Body -->
+    <div class="card-body px-4 py-4">
+      <div class="row">
+        <!-- Profile Picture -->
+        <div class="col-md-5 text-center">
+          {% if advocate.picture %}
+            <img src="{{ advocate.picture.url }}" class="img-thumbnail shadow-sm" 
+                 alt="Advocate's Picture" width="230" height="300" 
+                 style="border-radius: 10px; object-fit: cover;">
+          {% else %}
+            <div class="alert alert-secondary text-center">No profile picture available</div>
+          {% endif %}
+        </div>
+
+        <!-- Advocate Details -->
+        <div class="col-md-7">
+          <h4 class="text-primary fw-bold">{{ advocate.name }}</h4>
+          <hr>
+          <div class="row">
+            <div class="col-md-6">
+              <p><i class="fas fa-envelope text-muted"></i> <strong>Email:</strong> {{ advocate.email }}</p>
+              <p><i class="fas fa-phone text-muted"></i> <strong>Mobile:</strong> {{ advocate.mobile_number }}</p>
+              <p><i class="fas fa-id-badge text-muted"></i> <strong>Enrolment No:</strong> {{ advocate.enrolment_no }}</p>
+              <p><i class="fas fa-calendar text-muted"></i> <strong>DOB:</strong> {{ advocate.date_of_birth }}</p>
+            </div>
+            <div class="col-md-6">
+              <p><i class="fas fa-tint text-muted"></i> <strong>Blood Group:</strong> {{ advocate.blood_group }}</p>
+              <p><i class="fas fa-graduation-cap text-muted"></i> <strong>Enrolment Date:</strong> {{ advocate.date_of_enrolment }}</p>
+              <p><i class="fas fa-university text-muted"></i> <strong>Bar Registration:</strong> {{ advocate.bar_registration }}</p>
+              <p><i class="fas fa-calendar-check text-muted"></i> <strong>Joined Date:</strong> {{ advocate.joined_date }}</p>
+            </div>
+          </div>
+          <p class="mt-3"><i class="fas fa-map-marker-alt text-muted"></i> <strong>Address:</strong> {{ advocate.address }}</p>
+
+          <!-- Payment Information -->
+          <div class="mt-4">
+            <h5>Payment Information</h5>
+            <p><strong>Due Amount:</strong> ₹{{ advocate.due_amount }}</p>
             <hr>
-            <div class="row">
-              <div class="col-md-6">
-                <p><i class="fas fa-envelope text-muted"></i> <strong>Email:</strong> {{ advocate.email }}</p>
-                <p><i class="fas fa-phone text-muted"></i> <strong>Mobile:</strong> {{ advocate.mobile_number }}</p>
-                <p><i class="fas fa-id-badge text-muted"></i> <strong>Enrolment No:</strong> {{ advocate.enrolment_no }}</p>
-                <p><i class="fas fa-calendar text-muted"></i> <strong>DOB:</strong> {{ advocate.date_of_birth }}</p>
-              </div>
-              <div class="col-md-6">
-                <p><i class="fas fa-tint text-muted"></i> <strong>Blood Group:</strong> {{ advocate.blood_group }}</p>
-                <p><i class="fas fa-graduation-cap text-muted"></i> <strong>Enrolment Date:</strong> {{ advocate.date_of_enrolment }}</p>
-                <p><i class="fas fa-university text-muted"></i> <strong>Bar Registration:</strong> {{ advocate.bar_registration }}</p>
-                <p><i class="fas fa-calendar-check text-muted"></i> <strong>Joined Date:</strong> {{ advocate.joined_date }}</p>
-              </div>
+
+            <!-- Payment Options -->
+            <div class="d-flex justify-content-start mt-3">
+              <a href="{% url 'debt_pay' advocate.id %}" class="btn btn-danger me-3">
+                <i class="fas fa-credit-card"></i> Debt Pay
+              </a>
+              <a href="{% url 'normal_pay' advocate.id %}" class="btn btn-primary">
+                <i class="fas fa-credit-card"></i> Normal Pay
+              </a>
             </div>
-            <p class="mt-3"><i class="fas fa-map-marker-alt text-muted"></i> <strong>Address:</strong> {{ advocate.address }}</p>
           </div>
-        </div>
-
-        <!-- Pending Dues Section -->
-        <div class="mt-5">
-          <h5 class="text-primary fw-bold">Pending Dues</h5>
-          <hr>
-          {% if advocate.monthly_dues.all %}
-            <ul class="list-group">
-              {% for due in advocate.monthly_dues.all %}
-                <li class="list-group-item d-flex justify-content-between">
-                  <span>Due for {{ due.month|date:"F Y" }}:</span> 
-                  <strong>₹{{ due.amount_due }}</strong>
-                </li>
-              {% endfor %}
-            </ul>
-            {% if advocate.monthly_dues.all|length >= 9 %}
-              <p class="mt-2 text-danger"><strong>Note:</strong> ₹500 extra required in September.</p>
-            {% endif %}
-          {% else %}
-            <p class="alert alert-success">No pending dues for this advocate.</p>
-          {% endif %}
-        </div>
-       
-        <!-- Payment History Section -->
-        <div class="mt-5">
-          <h5 class="text-primary fw-bold">Payment History</h5>
-          <hr>
-          {% if advocate.payments.all %}
-            <table class="table table-bordered">
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Amount</th>
-                  <th>Covered Period</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for payment in advocate.payments.all %}
-                  <tr>
-                    <td>{{ payment.payment_date }}</td>
-                    <td>₹{{ payment.amount }}</td>
-                    <td>{{ payment.start_month|date:"F Y" }} - {{ payment.end_month|date:"F Y" }}</td>
-                    <td>{{ payment.status }}</td>
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          {% else %}
-            <p class="alert alert-warning">No payments made yet.</p>
-          {% endif %}
-        </div>
-
-        <!-- Payment Form Section -->
-        <div class="mt-5">
-          <h5 class="text-primary fw-bold">Make a Payment</h5>
-          <hr>
-          <form method="POST" action="{% url 'make_payment' advocate.id %}">
-            {% csrf_token %}
-            <div class="form-group">
-              <label for="amount">Amount (₹):</label>
-              <input type="number" class="form-control" id="amount" name="amount" required min="100" 
-              value="{{ total_amount_due }}">
-            </div>
-            <div class="form-group">
-              <label for="months">Months to Pay:</label>
-              <select class="form-control" id="months" name="months" required>
-                <option value="1">1 Month</option>
-                <option value="2">2 Months</option>
-                <option value="3">3 Months</option>
-                <option value="6">6 Months</option>
-                <option value="12">12 Months</option>
-              </select>
-            </div>
-            <button type="submit" class="btn btn-primary mt-3">Make Payment</button>
-          </form>
         </div>
       </div>
 
-      <!-- Footer -->
-      <div class="card-footer bg-light text-center py-3">
-        <a href="{% url 'advocate_list' %}" class="btn btn-outline-primary px-4">
-          <i class="fas fa-arrow-left"></i> Back to List
-        </a>
+      <!-- Monthly Dues Details -->
+      <div class="mt-5">
+        <h5 class="text-danger">Pending Dues</h5>
+        {% if due_entries %}
+          <table class="table table-bordered table-striped">
+            <thead class="table-dark">
+              <tr>
+                <th>Month</th>
+                <th>Year</th>
+                <th>Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for due in due_entries %}
+              <tr>
+                <td>{{ due.month }}</td>
+                <td>{{ due.year }}</td>
+                <td>₹{{ due.amount }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <div class="alert alert-success">No pending dues!</div>
+        {% endif %}
+      </div>
+
+      <!-- Recent Payments -->
+      <div class="mt-5">
+        <h5 class="text-success">Recent Payments</h5>
+        {% if recent_payments %}
+          <table class="table table-hover table-sm">
+            <thead class="table-secondary">
+              <tr>
+                <th>Serial No.</th>
+                <th>Date</th>
+                <th>Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for payment in recent_payments %}
+              <tr>
+                <td>{{ payment.serial_number }}</td>
+                <td>{{ payment.payment_date|date:"d M Y" }}</td>
+                <td>₹{{ payment.amount }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <div class="alert alert-info">No payments found.</div>
+        {% endif %}
       </div>
     </div>
+
+    <!-- Footer -->
+    <div class="card-footer bg-light text-center py-3">
+      <a href="{% url 'advocate_list' %}" class="btn btn-outline-primary px-4">
+        <i class="fas fa-arrow-left"></i> Back to List
+      </a>
+    </div>
   </div>
+</div>
 {% endblock %}

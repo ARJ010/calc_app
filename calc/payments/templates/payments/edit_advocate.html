@@ -6,15 +6,15 @@
 {% block content %}
 <div class="container mt-5">
     <h2 class="text-center mb-4">Edit Advocate Profile</h2>
-    
+
     <!-- Form for Editing Advocate Profile -->
     <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
-        
+
         <!-- User Details Section -->
         <div class="card p-4 mb-4 shadow-sm">
             <h4 class="mb-3">User Information</h4>
-            
+
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label for="{{ user_form.username.id_for_label }}" class="form-label">Username</label>
@@ -75,57 +75,54 @@
                 </div>
             </div>
 
+            <!-- Kawf Number Section -->
             <div class="row">
-                <!-- Address -->
+                <div class="col-md-6 mb-3">
+                    <label for="{{ advocate_form.kawf_no.id_for_label }}" class="form-label">KAWF Number</label>
+                    {{ advocate_form.kawf_no|add_class:"form-control" }}
+                    <div class="invalid-feedback">
+                        {% for error in advocate_form.kawf_no.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Address and Other Details Section -->
+            <div class="row">
                 <div class="col-md-6 mb-3">
                     <label for="{{ advocate_form.address.id_for_label }}" class="form-label">Address</label>
                     {{ advocate_form.address|add_class:"form-control" }}
                 </div>
-            
-                <!-- Joined Date and Profile Picture stacked -->
-                <div class="col-md-6">
-                    <div class="row">
-                        <div class="col-md-12 mb-3">
-                            <label for="{{ advocate_form.email.id_for_label }}" class="form-label">Due Amount</label>
-                            {{ advocate_form.due_amount|add_class:"form-control" }}
-                            <div class="invalid-feedback">
-                                {% for error in advocate_form.email.errors %}
-                                    <p>{{ error }}</p>
-                                {% endfor %}
-                            </div>
-                        </div>
-                        <!-- Joined Date -->
-                        <div class="col-md-12 mb-3">
-                            <label for="{{ advocate_form.joined_date.id_for_label }}" class="form-label">Joined Date</label>
-                            {{ advocate_form.joined_date|add_class:"form-control" }}
-                        </div>
-                        <!-- Profile Picture -->
-                        <div class="col-md-12 mb-3">
-                            <label for="{{ advocate_form.picture.id_for_label }}" class="form-label">Profile Picture</label>
-                            <div class="d-flex align-items-center">
-                                <!-- If there is an image, display it as a thumbnail -->
-                                {% if advocate_form.instance.picture %}
-                                    <img src="{{ advocate_form.instance.picture.url }}" class="img-thumbnail mr-3" width="100">
-                                {% endif %}
-                                <!-- File input with custom styling -->
-                                <input type="file" name="picture" class="form-control" id="{{ advocate_form.picture.id_for_label }}">
-                            </div>
-                        </div>
-                    </div>
+
+                <div class="col-md-3 mb-3">
+                    <label for="{{ advocate_form.due_amount.id_for_label }}" class="form-label">Due Amount</label>
+                    {{ advocate_form.due_amount|add_class:"form-control" }}
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <label for="{{ advocate_form.joined_date.id_for_label }}" class="form-label">Joined Date</label>
+                    {{ advocate_form.joined_date|add_class:"form-control" }}
                 </div>
             </div>
-            
 
-        <!-- Submit Button -->
-    <div class="d-flex justify-content-center gap-3 mt-4">
-        <!-- Update Button -->
-        <button type="submit" class="btn btn-primary btn-lg px-4 py-2">Update Advocate</button>
-      
-        <!-- Cancel Button -->
-        <a href="{% url 'advocate_list' %}" class="btn btn-outline-secondary btn-lg text-center w-auto">
-          Cancel
-        </a>
-      </div>
+            <!-- Profile Picture Section -->
+            <div class="mb-3">
+                <label for="{{ advocate_form.picture.id_for_label }}" class="form-label">Profile Picture</label>
+                <div class="d-flex align-items-center">
+                    {% if advocate_form.instance.picture %}
+                        <img src="{{ advocate_form.instance.picture.url }}" class="img-thumbnail me-3" width="100">
+                    {% endif %}
+                    <input type="file" name="picture" class="form-control" id="{{ advocate_form.picture.id_for_label }}">
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit and Cancel Buttons -->
+        <div class="d-flex justify-content-center gap-3 mt-4">
+            <button type="submit" class="btn btn-primary btn-lg px-4 py-2">Update Advocate</button>
+            <a href="{% url 'advocate_list' %}" class="btn btn-outline-secondary btn-lg text-center w-auto">Cancel</a>
+        </div>
     </form>
 </div>
 {% endblock %}
