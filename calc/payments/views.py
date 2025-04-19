@@ -19,10 +19,26 @@ from datetime import datetime
 # Create your views here.
 
 
-@login_required()
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from .models import Advocate
+
+@login_required
 def index(request):
-    advocate = Advocate.objects.get(user=request.user)
+    try:
+        advocate = Advocate.objects.get(user=request.user)
+    except Advocate.DoesNotExist:
+        # Create dummy data for the Advocate if it doesn't exist
+        advocate = Advocate.objects.create(
+            user=request.user,
+            name="Dummy Advocate",
+            registration_number="123456",
+            contact_info="dummy@example.com",
+            address="123 Dummy Street, Dummy City"
+        )
+
     return render(request, 'payments/index.html', {'advocate': advocate})
+
 
 
 def advocate_list(request):
