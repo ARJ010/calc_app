@@ -71,8 +71,8 @@
 
 ## Project Structure
 
-- `calc_project/` – Main project folder containing settings and configurations.
-- `accounting/` – App for managing advocate details and payment tracking.
+- `calc/` – Main project folder containing settings and configurations.
+- `payments/` – App for managing advocate details and payment tracking.
 - `templates/` – HTML templates for the web interface.
 - `static/` – Static files (CSS, JavaScript, images).
 
