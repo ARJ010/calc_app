@@ -45,7 +45,7 @@
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/YourUsername/CALC.git
+   git clone https://github.com/ARJ010/CALC.git
    cd CALC
    ```
 
