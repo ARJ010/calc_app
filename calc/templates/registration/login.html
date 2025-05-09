@@ -1,126 +1,103 @@
-<!DOCTYPE html>
 {% load static %}
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hosdurg Bar Association | Login</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background: linear-gradient(135deg, #1a1a1a 0%, #2c2c2c 100%);
-        }
-
-        .container {
-            text-align: center;
-            padding: 35px;
-            width: 350px;
-            border-radius: 10px;
-            background-color: #202020;
-            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
-            border: 1px solid #3d3d3d;
-        }
-
-        .logo {
-            width: 90px;
-            height: 90px;
-            border-radius: 50%;
-            margin-bottom: 15px;
-            border: 2px solid #4a90e2;
-            box-shadow: 0 4px 12px rgba(74, 144, 226, 0.2);
-        }
-
-        .title {
-            font-size: 22px;
-            font-weight: 600;
-            color: #ffffff;
-            margin-bottom: 6px;
-        }
-
-        .subtitle {
-            font-size: 16px;
-            font-weight: 400;
-            color: #bbbbbb;
-            margin-bottom: 25px;
-        }
-
-        label {
-            display: block;
-            text-align: left;
-            margin-bottom: 6px;
-            font-weight: 500;
-            color: #ffffff;
-            font-size: 14px;
-        }
-
-        input[type="text"],
-        input[type="password"] {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 18px;
-            border-radius: 6px;
-            border: 1px solid #3d3d3d;
-            background: rgba(255, 255, 255, 0.05);
-            color: #ffffff;
-            font-size: 14px;
-        }
-
-        input[type="text"]:focus,
-        input[type="password"]:focus {
-            border-color: #4a90e2;
-            outline: none;
-            box-shadow: 0 0 6px rgba(74, 144, 226, 0.4);
-        }
-
-        input[type="submit"] {
-            width: 100%;
-            padding: 14px;
-            background-color: #4a90e2;
-            color: white;
-            font-weight: 600;
-            font-size: 15px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        input[type="submit"]:hover {
-            background-color: #357abd;
-        }
-
-        ul.errorlist.nonfield {
-            color: #ff4d4d;
-            list-style: none;
-            padding: 0;
-            margin: 10px 0;
-            font-size: 14px;
-        }
-
-        @media screen and (max-width: 400px) {
-            .container {
-                width: 90%;
-                padding: 25px;
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CALC Login | Hosdurg Bar Association</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <div class="container">
-        <img src="{% static 'icon.png' %}" alt="Logo" class="logo">
-        <div class="title">Hosdurg Bar Association</div>
-        <div class="subtitle">C.A.L.C. Login</div>
-        <form method="post" action="">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <input type="submit" value="Sign In">
-        </form>
+<body class="bg-black min-h-screen flex items-center justify-center relative">
+  <!-- Background Image with Blur Effect -->
+  <div class="absolute top-0 left-0 w-full h-full bg-cover bg-center filter blur-md z-[-1]" style="background-image: url('{% static 'kasargod-court.jpg' %}');"></div>
+
+  <div class="bg-gradient-to-br from-[#0f0f0f] to-[#1a1a1a] w-full max-w-md p-10 rounded-2xl shadow-2xl border border-gray-800 neon-background">
+    <div class="flex flex-col items-center">
+      <div class="mb-6">
+        <img src="{% static 'icon.png' %}" class="w-12 h-12 logo" alt="C.A.L.C. Logo" />
+      </div>
+      <h2 class="text-white text-2xl font-semibold mb-2 text-center">Welcome to C.A.L.C.</h2>
+      <p class="text-gray-400 text-sm mb-6 text-center">Counsel Accounting and Ledger Control</p>
     </div>
+
+    <form method="post" action="" class="space-y-4">
+      {% csrf_token %}
+      {% for field in form %}
+        <div class="space-y-2">
+          <label for="{{ field.id_for_label }}" class="block text-sm text-gray-400 mb-1">{{ field.label }}</label>
+          <div class="relative">
+            <input type="{{ field.field.widget.input_type }}" 
+                   id="{{ field.id_for_label }}" 
+                   name="{{ field.name }}" 
+                   class="w-full px-4 py-2 bg-[#1f1f1f] text-white rounded-md border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-400" 
+                   value="{{ field.value|default:'' }}" 
+                   placeholder="{{ field.field.widget.attrs.placeholder }}" />
+            {% if field.errors %}
+              <ul class="errorlist text-red-500 text-xs mt-1">
+                {% for error in field.errors %}
+                  <li>{{ error }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+
+      {% if form.non_field_errors %}
+        <ul class="errorlist text-red-500 text-xs mt-1">
+          {% for error in form.non_field_errors %}
+            <li>{{ error }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+
+      <button type="submit" class="w-full py-2 bg-lime-400 text-black rounded-md font-medium hover:bg-lime-500 transition">
+        Login
+      </button>
+
+      <div class="text-center text-xs text-gray-600 mt-6">
+        <a href="#" class="hover:underline">Terms & Conditions</a> • <a href="#" class="hover:underline">Privacy Policy</a>
+      </div>
+    </form>
+  </div>
+
+  <style>
+    /* Adjustments to the input box */
+    input[type="email"], input[type="password"] {
+      background-color: #1f1f1f;
+      border: 1px solid #3b3b3b;
+      color: #fff;
+      padding: 12px;
+      border-radius: 8px;
+      width: 100%;
+      font-size: 14px;
+      outline: none;
+    }
+
+    input[type="email"]:focus, input[type="password"]:focus {
+      border-color: #4CAF50; /* Green border on focus */
+      box-shadow: 0 0 5px rgba(76, 175, 80, 0.6);
+    }
+
+    /* Fix for input placeholders */
+    input::placeholder {
+      color: #9a9a9a; /* Gray color for placeholders */
+    }
+
+    /* Neon Glow Effect on Background */
+    .neon-background {
+        box-shadow: 0 0 30px rgba(0, 255, 255, 0.7), 0 0 60px rgba(0, 255, 255, 0.5), 0 0 90px rgba(0, 255, 255, 0.3);
+    }
+
+    /* Logo Styling */
+    .logo {
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        margin-bottom: 15px;
+        border: 2px solid #4a90e2;
+        box-shadow: 0 4px 12px rgba(38, 128, 235, 0.2);
+    }
+  </style>
 </body>
 </html>

@@ -1,85 +1,88 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block content %}
-<div class="container mt-4">
-  <div class="card shadow-lg border-0">
+<div class="container mt-5">
+
+  {% if not is_admin or advocate %}
+  <!-- Advocate Full Profile for Normal Users -->
+  <div class="card shadow-lg rounded-4 border-0">
     <!-- Header -->
-    <div class="card-header bg-primary text-white text-center py-3">
-      <h3 class="mb-0">Advocate Profile - {{ advocate.name }}</h3>
+    <div class="card-header bg-primary text-white text-center rounded-top-4 py-4">
+      <h3 class="mb-0 fw-bold">Advocate Profile - {{ advocate.user.get_full_name }}</h3>
     </div>
 
     <!-- Card Body -->
-    <div class="card-body px-4 py-4">
-      <div class="row">
+    <div class="card-body p-4">
+      <div class="row g-4">
         <!-- Profile Picture -->
-        <div class="col-md-5 text-center">
+        <div class="col-md-4 text-center">
           {% if advocate.picture %}
-            <img src="{{ advocate.picture.url }}" class="img-thumbnail shadow-sm" 
-                 alt="Advocate's Picture" width="230" height="300" 
-                 style="border-radius: 10px; object-fit: cover;">
+          <img src="{{ advocate.picture.url }}" alt="Advocate's Picture" class="img-fluid rounded shadow-sm" style="height: 300px; object-fit: cover;">
           {% else %}
-            <div class="alert alert-secondary text-center">No profile picture available</div>
+            <img src="{% static 'default-avatar.webp' %}" class="advocate-img img-fluid" alt="Default Avatar">
           {% endif %}
         </div>
 
         <!-- Advocate Details -->
-        <div class="col-md-7">
+        <div class="col-md-8">
           <h4 class="text-primary fw-bold">{{ advocate.name }}</h4>
           <hr>
           <div class="row">
             <div class="col-md-6">
-              <p><i class="fas fa-envelope text-muted"></i> <strong>Email:</strong> {{ advocate.email }}</p>
-              <p><i class="fas fa-phone text-muted"></i> <strong>Mobile:</strong> {{ advocate.mobile_number }}</p>
-              <p><i class="fas fa-id-badge text-muted"></i> <strong>Enrolment No:</strong> {{ advocate.enrolment_no }}</p>
-              <p><i class="fas fa-calendar text-muted"></i> <strong>DOB:</strong> {{ advocate.date_of_birth }}</p>
+              <p><strong>Email:</strong> {{ advocate.email }}</p>
+              <p><strong>Mobile:</strong> {{ advocate.mobile_number }}</p>
+              <p><strong>Enrolment No:</strong> {{ advocate.enrolment_no }}</p>
+              <p><strong>Date of Birth:</strong> {{ advocate.date_of_birth }}</p>
             </div>
             <div class="col-md-6">
-              <p><i class="fas fa-tint text-muted"></i> <strong>Blood Group:</strong> {{ advocate.blood_group }}</p>
-              <p><i class="fas fa-graduation-cap text-muted"></i> <strong>Enrolment Date:</strong> {{ advocate.date_of_enrolment }}</p>
-              <p><i class="fas fa-university text-muted"></i> <strong>Bar Registration:</strong> {{ advocate.bar_registration }}</p>
-              <p><i class="fas fa-calendar-check text-muted"></i> <strong>Joined Date:</strong> {{ advocate.joined_date }}</p>
+              <p><strong>Blood Group:</strong> {{ advocate.blood_group }}</p>
+              <p><strong>Enrolment Date:</strong> {{ advocate.date_of_enrolment }}</p>
+              <p><strong>Bar Registration:</strong> {{ advocate.bar_registration }}</p>
+              <p><strong>Joined Date:</strong> {{ advocate.joined_date }}</p>
             </div>
           </div>
-          <p class="mt-3"><i class="fas fa-map-marker-alt text-muted"></i> <strong>Address:</strong> {{ advocate.address }}</p>
+          <p class="mt-3"><strong>Address:</strong> {{ advocate.address }}</p>
 
-          <!-- Payment Information -->
-          <div class="mt-4">
-            <h5>Payment Information</h5>
-            <p><strong>Due Amount:</strong> ₹{{ advocate.due_amount }}</p>
-            <hr>
+          <!-- Payment Info -->
+          <div class="bg-light p-3 rounded mt-4">
+            <h5 class="text-dark mb-2">Payment Information</h5>
+            <p class="mb-0"><strong>Due Amount:</strong> ₹{{ advocate.due_amount }}</p>
           </div>
 
-          <div class="d-flex justify-content-start mt-3">
-            <a href="{% url 'change_username_password' %}" class="btn btn-danger me-3">
-              <i class="fas fa-credit-card"></i> Edit
+          <div class="mt-3">
+            <a href="{% url 'change_username_password' %}" class="btn btn-outline-primary rounded-pill">
+              <i class="fas fa-edit me-2"></i>Edit Info
             </a>
           </div>
         </div>
       </div>
 
-      <!-- Monthly Dues Details -->
+      <!-- Pending Dues -->
       <div class="mt-5">
         <h5 class="text-danger">Pending Dues</h5>
         {% if due_entries %}
-          <table class="table table-bordered table-striped">
-            <thead class="table-dark">
-              <tr>
-                <th>Month</th>
-                <th>Year</th>
-                <th>Amount</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for due in due_entries %}
-              <tr>
-                <td>{{ due.month }}</td>
-                <td>{{ due.year }}</td>
-                <td>₹{{ due.amount }}</td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
+          <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+              <thead class="table-dark">
+                <tr>
+                  <th>Month</th>
+                  <th>Year</th>
+                  <th>Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for due in due_entries %}
+                <tr>
+                  <td>{{ due.month }}</td>
+                  <td>{{ due.year }}</td>
+                  <td>₹{{ due.amount }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
         {% else %}
-          <div class="alert alert-success">No pending dues!</div>
+          <div class="alert alert-success mt-3">No pending dues!</div>
         {% endif %}
       </div>
 
@@ -87,30 +90,115 @@
       <div class="mt-5">
         <h5 class="text-success">Recent Payments</h5>
         {% if recent_payments %}
-          <table class="table table-hover table-sm">
-            <thead class="table-secondary">
-              <tr>
-                <th>Serial No.</th>
-                <th>Date</th>
-                <th>Amount</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for payment in recent_payments %}
-              <tr>
-                <td>{{ payment.serial_number }}</td>
-                <td>{{ payment.payment_date|date:"d M Y" }}</td>
-                <td>₹{{ payment.amount }}</td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
+          <div class="table-responsive">
+            <table class="table table-hover table-sm">
+              <thead class="table-secondary">
+                <tr>
+                  <th>Serial No.</th>
+                  <th>Date</th>
+                  <th>Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for payment in recent_payments %}
+                <tr>
+                  <td>{{ payment.serial_number }}</td>
+                  <td>{{ payment.payment_date|date:"d M Y" }}</td>
+                  <td>₹{{ payment.amount }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
         {% else %}
-          <div class="alert alert-info">No recent payments found.</div>
+          <div class="alert alert-info mt-3">No payments found.</div>
         {% endif %}
       </div>
     </div>
 
+    </div>
   </div>
+
+  {% else %}
+  <!-- Admin Dashboard View -->
+  <div class="card shadow-lg rounded-4 border-0 p-5 mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <div class="d-flex align-items-center justify-content-between">
+          <h3 class="text-primary fw-bold mb-0">
+            {{ request.user.get_full_name }}
+            <a href="{% url 'edit_admin' %}" class="text-decoration-none ms-2" title="Edit Admin Details">
+              <i class="bi bi-pencil"></i>  <!-- Bootstrap pencil icon -->
+            </a>
+        </h3>
+        
+        </div>
+        <p class="text-muted">(Administrator Dashboard)</p>
+      </div>
+      <div>
+        <i class="fas fa-user-shield fa-2x text-secondary"></i>
+      </div>
+    </div>
+  
+    <!-- Core Management Section -->
+    <div class="mb-5">
+      <h5 class="text-dark fw-semibold mb-3">Core Management</h5>
+      <div class="row g-4">
+        <div class="col-md-4">
+          <a href="{% url 'advocate_list' %}" class="btn btn-outline-primary w-100 py-3 rounded-4 shadow-sm">
+            <i class="fas fa-users me-2"></i>Manage Advocates
+          </a>
+        </div>
+        <div class="col-md-4">
+          <a href="{% url 'manage_admins' %}" class="btn btn-outline-secondary w-100 py-3 rounded-4 shadow-sm">
+            <i class="fas fa-user-cog me-2"></i>Manage Admins
+          </a>
+        </div>
+        <div class="col-md-4">
+          <a href="{% url 'payment_due_report' %}" class="btn btn-outline-danger w-100 py-3 rounded-4 shadow-sm">
+            <i class="fas fa-file-invoice-dollar me-2"></i>Payment Dues Report
+          </a>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Additional Tools -->
+    <div class="mb-5">
+      <h5 class="text-dark fw-semibold mb-3">Additional Tools</h5>
+      <div class="row g-4">
+        <div class="col-md-4">
+          <a href="{% url 'register_advocate' %}" class="btn btn-outline-success w-100 py-3 rounded-4 shadow-sm">
+            <i class="fas fa-user-plus me-2"></i>Register New Advocate
+          </a>
+        </div>
+        <div class="col-md-4">
+          <a href="{% url 'bulk_add_advocates' %}" class="btn btn-outline-dark w-100 py-3 rounded-4 shadow-sm">
+            <i class="fas fa-file-upload me-2"></i>Bulk Add Advocates
+          </a>
+        </div>
+        <div class="col-md-4">
+          <a href="{% url 'export_advocates_csv' %}" class="btn btn-outline-info w-100 py-3 rounded-4 shadow-sm">
+            <i class="fas fa-download me-2"></i>Export Advocates (CSV)
+          </a>
+        </div>
+      </div>
+    </div>
+  
+    
+  </div>
+  {% endif %}
+
+
 </div>
 {% endblock %}
+<style>
+  .advocate-img {
+    width: 120px;
+    height: 150px;
+    object-fit: cover;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    margin-top: 20px;
+  }
+
+</style>

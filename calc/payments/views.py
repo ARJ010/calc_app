@@ -3,16 +3,108 @@ from datetime import datetime
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.urls import reverse
-from .forms import CSVUploadForm,UserForm,AdvocateForm,EditUserForm
+from .forms import CSVUploadForm,UserForm,AdvocateForm,EditUserForm, CustomUserChangeForm
 from .models import Payment, Advocate, MonthlyPaymentDue
 from django.http import HttpResponse
 from django.db import transaction
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.exceptions import ValidationError
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.db.models import Q
 from decimal import Decimal  
 from datetime import datetime
+
+from django.contrib.auth.decorators import user_passes_test
+
+# Ensure only superusers or users with the "Admin" group can access
+def is_admin(user):
+    return user.groups.filter(name='Admin').exists() or user.is_superuser
+
+
+def manage_admins(request):
+    users = User.objects.exclude(username=request.user.username)  # Exclude logged-in user
+    admin_group = Group.objects.get(name='Admin')  # Get the "Admin" group
+
+    # Get all users who are part of the Admin group
+    admin_users = admin_group.user_set.all()
+
+    # Fetch advocates (excluding logged-in user)
+    advocates = Advocate.objects.exclude(user=request.user)  # Exclude logged-in user
+
+    if request.method == 'POST':
+        if 'add_admin' in request.POST:
+            username = request.POST.get('username')
+            user = User.objects.filter(username=username).first()
+            if user and user != request.user:  # Ensure the logged-in user is not added as admin
+                # Add the user to the "Admin" group
+                admin_group.user_set.add(user)
+                messages.success(request, f'{user.username} has been added to the Admin group.')
+            else:
+                messages.error(request, 'Invalid user or you cannot add yourself.')
+
+        elif 'remove_admin' in request.POST:
+            username = request.POST.get('username')
+            user = User.objects.filter(username=username).first()
+            
+            # Ensure the logged-in user is not trying to remove themselves
+            if user == request.user:
+                messages.error(request, 'You cannot remove yourself from the Admin group.')
+                return redirect('manage_admins')
+
+            # Check if the admin user has an associated advocate
+            try:
+                advocate = user.advocate
+            except Advocate.DoesNotExist:
+                advocate = None
+
+            # Only allow removal of an admin if they have an associated Advocate object
+            if advocate:
+                # Remove the user from the "Admin" group
+                admin_group.user_set.remove(user)
+                messages.success(request, f'{user.username} has been removed from the Admin group.')
+            else:
+                # Admins without an Advocate object cannot be removed, but can still be edited
+                messages.error(request, 'This admin cannot be removed as they do not have an associated Advocate object.')
+
+    return render(request, 'payments/manage_admins.html', {
+        'users': users,
+        'admin_users': admin_users,
+        'advocates': advocates
+    })
+
+from django.contrib.auth.forms import UserChangeForm
+from django.contrib import messages
+from django.shortcuts import render, redirect
+
+# Edit Admin View
+# Edit Admin View
+def edit_admin(request):
+    user = request.user
+
+    # Ensure the user is an admin
+    if not user.groups.filter(name='Admin').exists():
+        messages.error(request, "You do not have permission to edit this page.")
+        return redirect('home')
+
+    if request.method == 'POST':
+        form = CustomUserChangeForm(request.POST, instance=user)
+
+        if form.is_valid():
+            # Check if password is provided and set it
+            new_password = form.cleaned_data.get('password')
+            if new_password:
+                user.set_password(new_password)  # Set new password if provided
+            form.save()  # Save the other fields (first name, last name, email, etc.)
+
+            user.save()  # Save the user instance with updated details
+            messages.success(request, "Admin details updated successfully!")
+            return redirect('index')
+        else:
+            messages.error(request, "Please fix the errors below.")
+    else:
+        form = CustomUserChangeForm(instance=user)
+
+    return render(request, 'payments/edit_admin.html', {'form': form})
 
 
 
@@ -23,21 +115,82 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from .models import Advocate
 
+
 @login_required
 def index(request):
+    is_admin = request.user.groups.filter(name='Admin').exists()
+
     try:
         advocate = Advocate.objects.get(user=request.user)
+        due_entries = MonthlyPaymentDue.objects.filter(advocate=advocate, paid=False).order_by('year', 'month')
+        recent_payments = Payment.objects.filter(advocate=advocate).order_by('-payment_date')[:10]
     except Advocate.DoesNotExist:
-        # Create dummy data for the Advocate if it doesn't exist
-        advocate = Advocate.objects.create(
-            user=request.user,
-            name="Dummy Advocate",
-            registration_number="123456",
-            contact_info="dummy@example.com",
-            address="123 Dummy Street, Dummy City"
-        )
+        advocate = None
+        if not is_admin:
+            # Create only for non-admins
+            advocate = Advocate.objects.create(
+                user=request.user,
+                enrolment_no="DUMMY1234",
+                mobile_number="0000000000",
+                address="Dummy Address"
+            )
 
-    return render(request, 'payments/index.html', {'advocate': advocate})
+    return render(request, 'payments/index.html', {
+        'advocate': advocate,
+        'is_admin': is_admin,
+        'due_entries': due_entries,
+        'recent_payments': recent_payments
+    })
+
+
+from django.shortcuts import render
+from .models import Advocate, Payment, MonthlyPaymentDue
+from django.db.models import Q
+
+from .models import Advocate, Payment, MonthlyPaymentDue, MONTH_CHOICES
+
+def payment_due_report(request):
+    advocates = Advocate.objects.all()
+    selected_advocate = request.GET.get('advocate')
+    selected_month = request.GET.get('month')
+    selected_year = request.GET.get('year')
+    status = request.GET.get('status')  # "paid", "unpaid", "all"
+
+    payments = Payment.objects.all()
+    dues = MonthlyPaymentDue.objects.all()
+
+    if selected_advocate:
+        payments = payments.filter(advocate__id=selected_advocate)
+        dues = dues.filter(advocate__id=selected_advocate)
+
+    if selected_month:
+        payments = payments.filter(month=selected_month)
+        dues = dues.filter(month=selected_month)
+
+    if selected_year:
+        payments = payments.filter(year=selected_year)
+        dues = dues.filter(year=selected_year)
+
+    if status == 'paid':
+        dues = dues.filter(paid=True)
+    elif status == 'unpaid':
+        dues = dues.filter(paid=False)
+
+    context = {
+        'advocates': advocates,
+        'payments': payments,
+        'dues': dues,
+        'filters': {
+            'advocate': selected_advocate,
+            'month': selected_month,
+            'year': selected_year,
+            'status': status
+        },
+        'MONTH_CHOICES': MONTH_CHOICES,  # 👈 Add this line
+    }
+    return render(request, 'payments/report.html', context)
+
+
 
 
 
@@ -108,7 +261,11 @@ def edit_advocate(request, advocate_id):
             advocate_form.save()
             messages.success(request, "Advocate's profile has been updated successfully.")
             return redirect('advocate_list')  # Redirect to the advocate list after editing
-
+        else:
+            # You may want to show form errors here
+            print(user_form.errors)
+            print(advocate_form.errors)
+            messages.error(request, "Please correct the errors below.")
     else:
         user_form = EditUserForm(instance=user)
         advocate_form = AdvocateForm(instance=advocate)
@@ -153,7 +310,6 @@ def upload_advocates(request):
                 enrolment_no = row.get('enrolment_no')
                 kawf_no = row.get('kawf_no')  # New field
                 date_of_enrolment = row.get('date_of_enrolment')
-                bar_registration = row.get('bar_registration')
                 email = row.get('email') or f'{name.split()[0].lower()}@example.com'
                 address = row.get('address')
                 joined_date = row.get('joined_date')
@@ -169,13 +325,9 @@ def upload_advocates(request):
                     if Advocate.objects.filter(enrolment_no=enrolment_no).exists():
                         messages.warning(request, f"Advocate with enrolment number '{enrolment_no}' already exists. Skipping.")
                         continue
-                    if Advocate.objects.filter(bar_registration=bar_registration).exists():
-                        messages.warning(request, f"Advocate with bar registration '{bar_registration}' already exists. Skipping.")
-                        continue
                     
-                    username = name.split()[0].lower()
-                    password = f'{username}@123'
-                    user = User.objects.create_user(username=bar_registration, email=email, password=password)
+                    password = f'pass@123'
+                    user = User.objects.create_user(username=mobile_number, email=email, password=password)
                     user.first_name = name.split()[0]
                     user.last_name = name.split()[1] if len(name.split()) > 1 else ''
                     user.save()
@@ -189,7 +341,6 @@ def upload_advocates(request):
                             enrolment_no=enrolment_no,
                             kawf_no=kawf_no,  # Include kawf_no
                             date_of_enrolment=date_of_enrolment,
-                            bar_registration=bar_registration,
                             email=email,
                             address=address,
                             joined_date=joined_date,
@@ -222,19 +373,19 @@ def download_advocate_template(request):
     # Write the header row (field names)
     writer.writerow([
         'name', 'mobile_number', 'date_of_birth', 'blood_group', 'enrolment_no',
-        'date_of_enrolment', 'bar_registration', 'kawf_no', 'email', 'address',
+        'date_of_enrolment', 'kawf_no', 'email', 'address',
         'joined_date', 'due_amount'
     ])
 
     # Write two dummy rows
     writer.writerow([
-        'John Doe', '9876543210', '1990-01-01', 'O+', 'KL12345',
-        '2015-06-15', 'BR123456', 'KAWF001', 'john@example.com',
+        'John Doe', '234567819', '1990-01-01', 'O+', 'KL12345',
+        '2015-06-15', 'KAWF001', 'john@example.com',
         '123 Advocate Street, Cityville', '2020-01-01', '0.00'
     ])
     writer.writerow([
-        'Jane Smith', '9123456780', '1988-12-05', 'A-', 'KL67890',
-        '2017-03-20', 'BR654321', 'KAWF002', 'jane@example.com',
+        'Jane Smith', '123456789', '1988-12-05', 'A-', 'KL67890',
+        '2017-03-20', 'KAWF002', 'jane@example.com',
         '456 Legal Lane, Lawtown', '2021-05-10', '0.00'
     ])
 
@@ -256,13 +407,13 @@ def export_advocates_csv(request):
     
     # Write the header row
     writer.writerow(['Name', 'Mobile Number', 'Date of Birth', 'Blood Group', 'Enrolment No', 
-                     'Date of Enrolment', 'Bar Registration', 'Email', 'Address', 'Joined Date'])
+                     'Date of Enrolment', 'Email', 'Address', 'Joined Date'])
     
     # Query all advocates and write to CSV
     advocates = Advocate.objects.all()
     for advocate in advocates:
         writer.writerow([advocate.user.first_name+" "+advocate.user.last_name, advocate.mobile_number, advocate.date_of_birth, advocate.blood_group, 
-                         advocate.enrolment_no, advocate.date_of_enrolment, advocate.bar_registration, advocate.email,
+                         advocate.enrolment_no, advocate.date_of_enrolment, advocate.email,
                          advocate.address, advocate.joined_date])
     
     return response
@@ -294,7 +445,7 @@ def check_and_update_dues(request):
             return redirect('advocate_list')  # Redirect to a page listing all advocates
 
         # Loop through the months from April to the current month and year
-        for month in range(4, current_month + 1):  # Start from April (month 4)
+        for month in range(5, current_month + 1):  # Start from May (month 5)
             month_str = f"{month:02d}"
 
             # Check for advocates who have not paid for this month and create MonthlyPaymentDue entries
@@ -325,7 +476,7 @@ def check_and_update_dues(request):
                             messages.error(request, f"Error: Could not create due entry for {advocate.user.first_name}.")
 
         messages.success(request, f"Monthly dues for {current_month_str}/{current_year} have been checked and updated successfully.")
-        return redirect('advocate_list')  # Redirect to a page listing all advocates
+        return redirect('payment_due_report')  # Redirect to a page listing all advocates
 
     # Format current_month as a 2-digit string
     current_month_str = f"{current_month:02d}"
@@ -333,7 +484,7 @@ def check_and_update_dues(request):
     # Check if dues have already been checked for the current month and year
     if MonthlyPaymentDue.objects.filter(year=current_year, month=current_month_str).exists():
         messages.warning(request, "The monthly dues have already been checked for this month.")
-        return redirect('advocate_list')  # Redirect to a page listing all advocates
+        return redirect('payment_due_report')  # Redirect to a page listing all advocates
 
     # Loop through the months from April to the current month and year
     for month in range(1, current_month + 1):  # Start from April (month 4)
@@ -367,7 +518,7 @@ def check_and_update_dues(request):
                         messages.error(request, f"Error: Could not create due entry for {advocate.user.first_name}.")
 
     messages.success(request, f"Monthly dues for {current_month_str}/{current_year} have been checked and updated successfully.")
-    return redirect('advocate_list')  # Redirect to a page listing all advocates
+    return redirect('payment_due_report')  # Redirect to a page listing all advocates
 
 from decimal import Decimal
 from django.db.models import Sum
@@ -496,7 +647,13 @@ def normal_pay(request, advocate_id):
 
         # Ensure no duplicate month-year pairs
         existing_payments = Payment.objects.filter(advocate=advocate)
-        existing_month_years = {(payment.month, payment.year) for payment in existing_payments}
+        existing_payment_month_years = {(payment.month, payment.year) for payment in existing_payments}
+        existing_due_month_years = {
+            (due.month, due.year) for due in MonthlyPaymentDue.objects.filter(advocate=advocate, paid=False)
+        }
+
+        # Combine both sets
+        existing_month_years = existing_payment_month_years.union(existing_due_month_years)
 
         # Start adding payments month by month
         current_date = start_date
@@ -507,9 +664,13 @@ def normal_pay(request, advocate_id):
             year_str = current_date.year
 
             # Check if the month-year pair already exists
-            if (month_str, year_str) in existing_month_years:
+            if (month_str, year_str) in existing_payment_month_years:
                 messages.error(request, f"Payment for {calendar.month_name[current_date.month]} {current_date.year} already exists.")
                 return redirect('normal_pay', advocate_id=advocate.id)
+            elif (month_str, year_str) in existing_due_month_years:
+                messages.error(request, f"Due for {calendar.month_name[current_date.month]} {current_date.year} already exists.")
+                return redirect('normal_pay', advocate_id=advocate.id)
+
 
             # Create a unique serial number, e.g., 'MM-YYYY.1'
             serial_number = f"{month_str}-{year_str}.{serial_number_counter}"
@@ -594,14 +755,14 @@ def reset_advocate_credentials(request, advocate_id):
         user = advocate.user
 
         # Reset username to a unique detail (e.g., enrolment number)
-        user.username = advocate.enrolment_no  # Or any other unique detail
-        user.set_password('advocate@123')  # Common password
+        user.username = advocate.mobile_number  # Or any other unique detail
+        user.set_password('pass@123')  # Common password
         user.save()
 
         # Keep the user session active after password change
         update_session_auth_hash(request, user)
 
-        messages.success(request, f"Username and password reset for Advocate {advocate.user.first_name}.")
+        messages.success(request, f"Username and password reset for Advocate {advocate.user.first_name} with username:{advocate.mobile_number} and password:pass@123.")
         return redirect('advocate_details', advocate_id=advocate.id)  # Or wherever you want to redirect
 
     except Advocate.DoesNotExist:
@@ -612,55 +773,39 @@ def reset_advocate_credentials(request, advocate_id):
         messages.error(request, f"Error resetting credentials: {e}")
         return redirect(reverse('reset_advocate_credentials', args=[advocate_id]))
     
+# views.py
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
+from .models import Advocate
+from django.contrib.auth.models import User
+
+def delete_advocate(request, advocate_id):
+    # Get the advocate object
+    advocate = get_object_or_404(Advocate, id=advocate_id)
+
+    # Check if the current user is trying to delete themselves
+    if advocate.user == request.user:
+        messages.error(request, 'You cannot delete your own account.')
+        return redirect('advocate_list')  # Redirect to the advocate listing page
+
+    # Check if the user is in the "Admin" group
+    if request.user.groups.filter(name='Admin').exists():
+        # Get the associated user
+        user = advocate.user
+        
+        # Delete the advocate and the associated user
+        advocate.delete()  # This deletes the advocate instance
+        if user:
+            user.delete()  # This deletes the associated user
+        
+        messages.success(request, 'Advocate and their account were successfully deleted.')
+    else:
+        messages.error(request, 'You do not have permission to delete this advocate.')
+
+    return redirect('advocate_list')  # Redirect back to the advocate listing page
 
 
-from django.shortcuts import render
-from .models import Advocate, Payment, MonthlyPaymentDue
-from django.db.models import Count
+from django.http import HttpResponseNotFound
 
-def payment_history(request):
-    # Get filter parameters from GET request
-    selected_month = request.GET.get('month', '')
-    selected_year = request.GET.get('year', '')
-    payment_status = request.GET.get('payment_status', '')
-
-    # Initial query to get all payments
-    payments = Payment.objects.all()
-
-    # Apply filtering based on month and year if provided
-    if selected_month:
-        payments = payments.filter(month=selected_month)
-    if selected_year:
-        payments = payments.filter(year=selected_year)
-
-    # Apply filtering for payment status (Paid or Not Paid)
-    if payment_status == 'paid':
-        payments = payments.filter(amount__gt=0)  # Assume payments with amount > 0 are paid
-    elif payment_status == 'not_paid':
-        payments = payments.filter(amount=0)  # Assume payments with amount = 0 are not paid
-
-    # Dynamically get distinct months and years
-    months = payments.values('month').distinct()
-    years = payments.values('year').distinct()
-
-    # Get unique months and years (list of distinct month and year)
-    distinct_months = [entry['month'] for entry in months]
-    distinct_years = [entry['year'] for entry in years]
-
-    # Get the total number of payments for each advocate to show more details if needed
-    advocate_payments = payments.values('advocate').annotate(payment_count=Count('id'))
-
-    # Passing context to the template
-    context = {
-        'payments': payments,
-        'distinct_months': distinct_months,
-        'distinct_years': distinct_years,
-        'selected_month': selected_month,
-        'selected_year': selected_year,
-        'payment_status': payment_status,
-        'advocate_payments': advocate_payments,
-    }
-
-    return render(request, 'payments/payment_history.html', context)
-
-
+def handle_unknown_path(request, unknown_path):
+    return HttpResponseNotFound('Page not found.')
