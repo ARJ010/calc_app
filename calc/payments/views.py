@@ -1,26 +1,32 @@
 import csv
-from datetime import datetime
+import calendar
 from django.shortcuts import render, get_object_or_404, redirect
+from django.template.loader import render_to_string
 from django.contrib import messages
-from django.urls import reverse
-from .forms import CSVUploadForm,UserForm,AdvocateForm,EditUserForm, CustomUserChangeForm
-from .models import Payment, Advocate, MonthlyPaymentDue
-from django.http import HttpResponse
-from django.db import transaction
+from django.contrib.auth import update_session_auth_hash, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User, Group
-from django.db.models import Q
-from decimal import Decimal  
+from django.urls import reverse
+from django.http import HttpResponse
+from django.db import transaction, IntegrityError
+from django.db.models import Q, Sum
+from django.utils import timezone
+from .forms import CSVUploadForm,UserForm,AdvocateForm,EditUserForm, CustomUserChangeForm, ChangeUsernamePasswordForm
+from .models import Payment, Advocate, MonthlyPaymentDue, MONTH_CHOICES
+from weasyprint import HTML, CSS
 from datetime import datetime
+from decimal import Decimal
 
-from django.contrib.auth.decorators import user_passes_test
+
+
 
 # Ensure only superusers or users with the "Admin" group can access
 def is_admin(user):
     return user.groups.filter(name='Admin').exists() or user.is_superuser
 
 
+@login_required
+@user_passes_test(is_admin)
 def manage_admins(request):
     users = User.objects.exclude(username=request.user.username)  # Exclude logged-in user
     admin_group = Group.objects.get(name='Admin')  # Get the "Admin" group
@@ -72,12 +78,8 @@ def manage_admins(request):
         'advocates': advocates
     })
 
-from django.contrib.auth.forms import UserChangeForm
-from django.contrib import messages
-from django.shortcuts import render, redirect
-
-# Edit Admin View
-# Edit Admin View
+@login_required
+@user_passes_test(is_admin)
 def edit_admin(request):
     user = request.user
 
@@ -106,14 +108,6 @@ def edit_admin(request):
 
     return render(request, 'payments/edit_admin.html', {'form': form})
 
-
-
-# Create your views here.
-
-
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
-from .models import Advocate
 
 
 @login_required
@@ -145,12 +139,9 @@ def index(request):
     })
 
 
-from django.shortcuts import render
-from .models import Advocate, Payment, MonthlyPaymentDue
-from django.db.models import Q
 
-from .models import Advocate, Payment, MonthlyPaymentDue, MONTH_CHOICES
-
+@login_required
+@user_passes_test(is_admin)
 def payment_due_report(request):
     advocates = Advocate.objects.all()
     selected_advocate = request.GET.get('advocate')
@@ -196,6 +187,8 @@ def payment_due_report(request):
 
 
 
+@login_required
+@user_passes_test(is_admin)
 def advocate_list(request):
     search_query = request.GET.get('search', '')  # Get search query from the GET request
 
@@ -213,6 +206,8 @@ def advocate_list(request):
 
 
 
+@login_required
+@user_passes_test(is_admin)
 def register_advocate(request):
     if request.method == 'POST':
         user_form = UserForm(request.POST)
@@ -248,8 +243,9 @@ def register_advocate(request):
 
 
 
-# Edit Advocate Profile
 
+@login_required
+@user_passes_test(is_admin)
 def edit_advocate(request, advocate_id):
     advocate = get_object_or_404(Advocate, id=advocate_id)
     user = advocate.user  # Get the associated User instance
@@ -278,6 +274,8 @@ def edit_advocate(request, advocate_id):
     })
 
 
+@login_required
+@user_passes_test(is_admin)
 def advocate_detail(request, advocate_id):
     advocate = get_object_or_404(Advocate, id=advocate_id)
     name = advocate.user.first_name + " " + advocate.user.last_name
@@ -294,8 +292,9 @@ def advocate_detail(request, advocate_id):
 
 
 
-# For handling due_amount safely
 
+@login_required
+@user_passes_test(is_admin)
 def upload_advocates(request):
     if request.method == 'POST' and request.FILES.get('csv_file'):
         form = CSVUploadForm(request.POST, request.FILES)
@@ -364,6 +363,8 @@ def upload_advocates(request):
 
 
 
+@login_required
+@user_passes_test(is_admin)
 def download_advocate_template(request):
     # Create the HTTP response with the appropriate content type for a CSV file
     response = HttpResponse(content_type='text/csv')
@@ -396,9 +397,8 @@ def download_advocate_template(request):
 
 
 
-
-
-
+@login_required
+@user_passes_test(is_admin)
 def export_advocates_csv(request):
     # Create the HttpResponse object with the content-type for CSV
     response = HttpResponse(content_type='text/csv')
@@ -422,15 +422,8 @@ def export_advocates_csv(request):
 
 
 
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib import messages
-from django.utils import timezone
-from .models import Advocate, MonthlyPaymentDue, Payment
-from datetime import datetime, timedelta
-from calendar import monthrange
-from django.db import IntegrityError
-
-
+@login_required
+@user_passes_test(is_admin)
 def check_and_update_dues(request):
     today = timezone.now()
     current_month = today.month
@@ -522,10 +515,11 @@ def check_and_update_dues(request):
     messages.success(request, f"Monthly dues for {current_month_str}/{current_year} have been checked and updated successfully.")
     return redirect('payment_due_report')  # Redirect to a page listing all advocates
 
-from decimal import Decimal
-from django.db.models import Sum
 
 
+
+@login_required
+@user_passes_test(is_admin)
 def debt_pay(request, advocate_id):
     advocate = get_object_or_404(Advocate, id=advocate_id)
     name = advocate.user.first_name + " " + advocate.user.last_name
@@ -608,14 +602,9 @@ def debt_pay(request, advocate_id):
 
 
 
-from django.shortcuts import render, get_object_or_404, redirect
-from .models import Advocate, Payment
-from django.contrib import messages
-from django.utils import timezone
-from datetime import datetime
-import calendar
-
 # View for Normal Pay with start and end month/year
+@login_required
+@user_passes_test(is_admin)
 def normal_pay(request, advocate_id):
     advocate = get_object_or_404(Advocate, id=advocate_id)
     name = advocate.user.first_name + " " + advocate.user.last_name
@@ -708,11 +697,10 @@ def normal_pay(request, advocate_id):
 
 
 
-from django.shortcuts import render, redirect
-from django.contrib.auth import update_session_auth_hash, logout
-from django.contrib import messages
-from .forms import ChangeUsernamePasswordForm
 
+
+
+@login_required
 def change_username_password(request):
     if request.method == 'POST':
         form = ChangeUsernamePasswordForm(request.POST)
@@ -748,6 +736,8 @@ def change_username_password(request):
 
 
 
+@login_required
+@user_passes_test(is_admin)
 def reset_advocate_credentials(request, advocate_id):
     try:
         # Get the Advocate object based on advocate_id
@@ -775,12 +765,9 @@ def reset_advocate_credentials(request, advocate_id):
         messages.error(request, f"Error resetting credentials: {e}")
         return redirect(reverse('reset_advocate_credentials', args=[advocate_id]))
     
-# views.py
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib import messages
-from .models import Advocate
-from django.contrib.auth.models import User
 
+@login_required
+@user_passes_test(is_admin)
 def delete_advocate(request, advocate_id):
     # Get the advocate object
     advocate = get_object_or_404(Advocate, id=advocate_id)
@@ -807,17 +794,9 @@ def delete_advocate(request, advocate_id):
     return redirect('advocate_list')  # Redirect back to the advocate listing page
 
 
-from django.http import HttpResponseNotFound
 
-def handle_unknown_path(request, unknown_path):
-    return HttpResponseNotFound('Page not found.')
-
-
-from weasyprint import HTML, CSS
-from django.template.loader import render_to_string
-from django.http import HttpResponse
-import tempfile
-
+@login_required
+@user_passes_test(is_admin)
 def generate_experience_certificate(request, advocate_id):
     advocate = Advocate.objects.get(id=advocate_id)
 

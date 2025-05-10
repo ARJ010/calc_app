@@ -9,7 +9,6 @@ urlpatterns = [
     path('', views.index, name='index'),
     path('accounts/login/', auth_views.LoginView.as_view(), name='login'),
     path('accounts/logout/', auth_views.LogoutView.as_view(), name='logout'),
-
     path('register/', views.register_advocate, name='register_advocate'),
     path('advocate_list/',views.advocate_list, name='advocate_list'),
     path('advocate_details/<int:advocate_id>/',views.advocate_detail, name='advocate_details'),
