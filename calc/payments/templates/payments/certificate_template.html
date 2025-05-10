@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        @page {
+            size: A4;
+            margin: 0;
+        }
+
+        body {
+            font-family: "Times New Roman", serif;
+            margin: 0;
+            padding: 0;
+            width: 210mm;
+            height: 297mm;
+            background-color: #fff;
+        }
+
+        .certificate-box {
+            width: 100%;
+            height: 100%;
+            padding: 30px;
+            box-sizing: border-box;
+            background-color: #fff;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 1px solid #000;
+            padding-bottom: 15px;
+            margin-bottom: 0;
+        }
+
+        .header h1 {
+            font-size: 30px;
+            color: #2d4278;
+            margin: 0;
+            letter-spacing: 1px;
+        }
+
+        .header p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .content-wrapper {
+            display: flex;
+            gap: 30px;
+            width: 100%;
+        }
+
+        .left-bar {
+            width: 30%;
+            font-size: 15px;
+            text-align: center;
+            color: #769dc4;
+            margin-top: 20px;
+            padding-right: 15px;
+            line-height: 1.5;
+        }
+
+        .left-bar .ex {
+            font-size: 10px;
+            text-align: left;
+        }
+
+        .left-bar h3 {
+            color: #d2232a;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .left-bar .exs {
+            font-size: 12px;
+            text-align: left;
+        }
+
+        .left-bar p {
+            margin: 0 0 8px;
+        }
+
+        .main-content {
+            width: 100%;
+            font-size: 16px;
+            margin-top: 45px;
+            line-height: 1.6;
+            text-align: justify;
+            padding-right: 10px;
+        }
+
+        .main-content p {
+            margin-bottom: 15px;
+        }
+
+        .separator {
+            width: 1px;
+            background-color: #000;
+            align-self: stretch; /* This ensures the separator stretches to fill remaining space */
+            margin: 0;
+        }
+
+        .signature {
+            text-align: right;
+            margin-top: 60px;
+            font-size: 16px;
+        }
+
+        .signature p {
+            margin: 4px 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="certificate-box">
+    <div class="header">
+        <h1>BAR ASSOCIATION HOSDURG</h1>
+        <p>Reg. No.114/81 Phone: 0467-2203729</p>
+        <p>Email: barassociationhosdurg@gmail.com</p>
+        <p>P.O. KANHANGAD, KASARAGOD DISTRICT - 671315</p>
+    </div>
+
+    <div class="content-wrapper">
+        <div class="left-bar">
+            <h3>PRESIDENT</h3>
+            <p><b>P. NARAYANAN</b><br>Mob: 9447648777</p>
+
+            <h3>VICE PRESIDENT</h3>
+            <p><b>VINOD KUMAR. P. N</b><br>Mob: 9447479585</p>
+
+            <h3>SECRETARY</h3>
+            <p><b>MATHEW. K. L</b><br>Mob: 9447317288</p>
+
+            <h3>JOINT SECRETARY</h3>
+            <p><b>NASEEMA. E. K</b><br>Mob: 9496359531</p>
+
+            <h3>TREASURER</h3>
+            <p><b>SATHEESAN. P. K</b><br>Mob: 9495969074</p>
+
+            <h3 class="exs">EXECUTIVE MEMBERS</h3>
+            <p class="ex">
+                NARAYANAN. B<br>
+                RAVEENDRAN. V. V<br>
+                SUNNY GEORGE<br>
+                AJAYKUMAR. P. V<br>
+                PURUSHOTHAMAN. M<br>
+                K. ABDUNNAZER<br>
+                DILISHKUMAR. M. D<br>
+                SEEMA. N. P<br>
+                FATHIMATH RAHIYANA. T. K<br>
+                AKIL. K. S
+            </p>
+        </div>
+
+        <!-- Separator Line -->
+        <div class="separator"></div>
+
+        <div class="main-content">
+            <p style="text-indent: 70px;"> 
+                This is to certify that as per the records maintained by this office, <strong>Mr. {{ advocate_name }}</strong>,
+                advocate, Hosdurg, enrolled as an advocate on the roll of Bar Council of Kerala on
+                <strong>{{ enrolment_date }}</strong>, Roll No. <strong>{{ roll_no }}</strong>.
+            </p>
+
+            <p>
+                He is a member of this Bar Association from <strong>{{ joined_date }}</strong> onwards. He is practicing
+                as an advocate from <strong>{{ joined_date }}</strong> and continues his practice till date.
+            </p>
+
+            <p>
+                His conduct and character are found to be good during this period.
+            </p>
+
+            <div class="signature">
+                <p>Secretary,</p>
+                <p><strong>Bar Association Hosdurg</strong></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

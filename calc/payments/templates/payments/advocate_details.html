@@ -1,90 +1,97 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block content %}
-<div class="container mt-4">
-  <div class="card shadow-lg border-0">
+<div class="container mt-5">
+  <div class="card shadow-lg border-0 rounded-4">
     <!-- Header -->
-    <div class="card-header bg-primary text-white text-center py-3">
-      <h3 class="mb-0">Advocate Profile - {{ name }}</h3>
+    <div class="card-header bg-primary text-white text-center py-4">
+      <h3 class="mb-0">Advocate Profile - {{ advocate.user.get_full_name }}</h3>
     </div>
 
     <!-- Card Body -->
-    <div class="card-body px-4 py-4">
-      <div class="row">
+    <div class="card-body px-5 py-5">
+      <div class="row g-4">
         <!-- Profile Picture -->
-        <div class="col-md-5 text-center">
+        <div class="col-md-4 text-center">
           {% if advocate.picture %}
-            <img src="{{ advocate.picture.url }}" class="img-thumbnail shadow-sm" 
-                 alt="Advocate's Picture" width="230" height="300" 
-                 style="border-radius: 10px; object-fit: cover;">
+          <img src="{{ advocate.picture.url }}" alt="Advocate's Picture" class="img-fluid rounded shadow-sm" style="height: 300px; object-fit: cover;">
           {% else %}
-            <div class="alert alert-secondary text-center">No profile picture available</div>
+            <img src="{% static 'default-avatar.webp' %}" class="advocate-img img-fluid" alt="Default Avatar">
           {% endif %}
         </div>
 
         <!-- Advocate Details -->
-        <div class="col-md-7">
+        <div class="col-md-8">
           <h4 class="text-primary fw-bold">{{ advocate.name }}</h4>
-          <hr>
+          <hr class="my-3">
+
           <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-6 mb-3">
               <p><i class="fas fa-envelope text-muted"></i> <strong>Email:</strong> {{ advocate.email }}</p>
               <p><i class="fas fa-phone text-muted"></i> <strong>Mobile:</strong> {{ advocate.mobile_number }}</p>
               <p><i class="fas fa-id-badge text-muted"></i> <strong>Enrolment No:</strong> {{ advocate.enrolment_no }}</p>
               <p><i class="fas fa-calendar text-muted"></i> <strong>DOB:</strong> {{ advocate.date_of_birth }}</p>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-6 mb-3">
               <p><i class="fas fa-tint text-muted"></i> <strong>Blood Group:</strong> {{ advocate.blood_group }}</p>
               <p><i class="fas fa-graduation-cap text-muted"></i> <strong>Enrolment Date:</strong> {{ advocate.date_of_enrolment }}</p>
-              <p><i class="fas fa-university text-muted"></i> <strong>Bar Registration:</strong> {{ advocate.bar_registration }}</p>
               <p><i class="fas fa-calendar-check text-muted"></i> <strong>Joined Date:</strong> {{ advocate.joined_date }}</p>
             </div>
           </div>
+
           <p class="mt-3"><i class="fas fa-map-marker-alt text-muted"></i> <strong>Address:</strong> {{ advocate.address }}</p>
 
           <!-- Payment Information -->
           <div class="mt-4">
-            <h5>Payment Information</h5>
+            <h5 class="text-dark">Payment Information</h5>
             <p><strong>Due Amount:</strong> ₹{{ advocate.due_amount }}</p>
-            <hr>
 
-            <!-- Payment Options -->
-            <div class="d-flex justify-content-start mt-3">
-              <a href="{% url 'debt_pay' advocate.id %}" class="btn btn-danger me-3">
+            <div class="d-flex flex-wrap gap-3 mt-3">
+              <a href="{% url 'debt_pay' advocate.id %}" class="btn btn-danger px-4 py-2">
                 <i class="fas fa-credit-card"></i> Debt Pay
               </a>
-              <a href="{% url 'normal_pay' advocate.id %}" class="btn btn-primary">
+              <a href="{% url 'normal_pay' advocate.id %}" class="btn btn-primary px-4 py-2">
                 <i class="fas fa-credit-card"></i> Normal Pay
               </a>
-              <a href="{% url 'reset_advocate_credentials' advocate_id=advocate.id %}" class="btn btn-warning">Reset Username/Password</a>
+              <a href="#" class="btn btn-warning px-4 py-2" data-bs-toggle="modal" data-bs-target="#warningModal" id="resetCredentialsBtn">
+                <i class="fas fa-refresh"></i> Reset Credentials
+            </a>
+            <a href="{% url 'generate_certificate' advocate.id %}" class="btn btn-primary" target="_blank">Download Experience Certificate</a>
+
+            
+
+              <a href="{% url 'edit_advocate' advocate.id %}" class="btn btn-warning px-4 py-2">Edit</a>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Monthly Dues Details -->
+      <!-- Pending Dues -->
       <div class="mt-5">
         <h5 class="text-danger">Pending Dues</h5>
         {% if due_entries %}
-          <table class="table table-bordered table-striped">
-            <thead class="table-dark">
-              <tr>
-                <th>Month</th>
-                <th>Year</th>
-                <th>Amount</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for due in due_entries %}
-              <tr>
-                <td>{{ due.month }}</td>
-                <td>{{ due.year }}</td>
-                <td>₹{{ due.amount }}</td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
+          <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+              <thead class="table-dark">
+                <tr>
+                  <th>Month</th>
+                  <th>Year</th>
+                  <th>Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for due in due_entries %}
+                <tr>
+                  <td>{{ due.month }}</td>
+                  <td>{{ due.year }}</td>
+                  <td>₹{{ due.amount }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
         {% else %}
-          <div class="alert alert-success">No pending dues!</div>
+          <div class="alert alert-success mt-3">No pending dues!</div>
         {% endif %}
       </div>
 
@@ -92,26 +99,28 @@
       <div class="mt-5">
         <h5 class="text-success">Recent Payments</h5>
         {% if recent_payments %}
-          <table class="table table-hover table-sm">
-            <thead class="table-secondary">
-              <tr>
-                <th>Serial No.</th>
-                <th>Date</th>
-                <th>Amount</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for payment in recent_payments %}
-              <tr>
-                <td>{{ payment.serial_number }}</td>
-                <td>{{ payment.payment_date|date:"d M Y" }}</td>
-                <td>₹{{ payment.amount }}</td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
+          <div class="table-responsive">
+            <table class="table table-hover table-sm">
+              <thead class="table-secondary">
+                <tr>
+                  <th>Serial No.</th>
+                  <th>Date</th>
+                  <th>Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for payment in recent_payments %}
+                <tr>
+                  <td>{{ payment.serial_number }}</td>
+                  <td>{{ payment.payment_date|date:"d M Y" }}</td>
+                  <td>₹{{ payment.amount }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
         {% else %}
-          <div class="alert alert-info">No payments found.</div>
+          <div class="alert alert-info mt-3">No payments found.</div>
         {% endif %}
       </div>
     </div>
@@ -124,4 +133,76 @@
     </div>
   </div>
 </div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="warningModal" tabindex="-1" aria-labelledby="warningModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="warningModalLabel">Warning</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to reset the credentials for this advocate? This action cannot be undone.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <a href="" id="resetLink" class="btn btn-danger">Confirm Reset</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- JavaScript -->
+<script>
+  // When the Reset Credentials button is clicked
+  document.getElementById('resetCredentialsBtn').addEventListener('click', function (e) {
+    e.preventDefault();
+    
+    // Get the URL for resetting the credentials
+    var advocateId = "{{ advocate.id }}";  // Make sure to pass this dynamically
+    var resetUrl = "{% url 'reset_advocate_credentials' advocate_id='ADVOCATE_ID' %}".replace("ADVOCATE_ID", advocateId);
+    
+    // Set the reset link in the modal
+    document.getElementById('resetLink').setAttribute('href', resetUrl);
+  });
+</script>
 {% endblock %}
+
+<style>
+  .advocate-img {
+    width: 120px;
+    height: 150px;
+    object-fit: cover;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    margin-top: 20px;
+  }
+
+  .card {
+    border-radius: 20px;
+  }
+
+  .btn {
+    font-size: 14px;
+    transition: all 0.3s ease;
+  }
+
+  .btn:hover {
+    opacity: 0.92;
+  }
+
+  .table th, .table td {
+    vertical-align: middle;
+  }
+
+  .table-hover tbody tr:hover {
+    background-color: #f1f1f1;
+  }
+
+  .card-header h3,
+  .card-body h5 {
+    font-weight: 600;
+  }
+</style>

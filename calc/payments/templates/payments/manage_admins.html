@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center">Manage Admin Group</h2>
+    
+    <!-- Success/Error Messages -->
+    {% if messages %}
+    <div class="alert alert-success mt-3">
+        {% for message in messages %}
+        <p>{{ message }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- List of Current Admin Users -->
+    <div class="mt-4">
+        <h5>Admin Users</h5>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in admin_users %}
+                    <tr>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>
+                            {% if user != request.user %}
+                                {% if user.advocate %}
+                                    <form method="post" class="d-inline">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="username" value="{{ user.username }}">
+                                        <button type="submit" name="remove_admin" class="btn btn-danger">Remove from Admin</button>
+                                    </form>
+                                {% else %}
+                                    <span class="text-muted">No Advocate Object - Cannot Remove</span>
+                                {% endif %}
+                            {% else %}
+                                <span class="text-muted">You cannot remove yourself</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Add New Admin (Dropdown Search) -->
+    <div class="mt-5">
+        <h5>Add New Admin</h5>
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="advocate" class="form-label">Search Advocate</label>
+                <select id="advocate" name="username" class="form-control select2" required>
+                    <option value="">Select Advocate</option>
+                    {% for advocate in advocates %}
+                        <option value="{{ advocate.user.username }}">
+                            {{ advocate.user.get_full_name|default:advocate.enrolment_no }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" name="add_admin" class="btn btn-success">Add Admin</button>
+        </form>
+    </div>
+</div>
+
+<!-- Include Select2.js for search functionality -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('.select2').select2();
+    });
+</script>
+
+{% endblock %}

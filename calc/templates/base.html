@@ -1,86 +1,99 @@
 {% load static %}
+{% load group_tags %}
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="
+    background-image: url('{% static 'bg.png' %}');
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: center;
+">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}C.A.L.C. - Counsel Accounting and Ledger Control{% endblock %}</title>
+
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+
+
+    <!-- Custom Styles -->
     <link rel="stylesheet" href="{% static 'base.css' %}">
-    
-    {% block extra_head %}
-    <!-- Extra CSS or scripts can be added here -->
-    {% endblock %}
+
+    {% block extra_head %}{% endblock %}
 </head>
-<body>
-    <!-- Navigation Bar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+<body style="
+    background-image: url('{% static 'bg.png' %}');
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: center;
+">    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
         <div class="container-fluid">
-            <a class="navbar-brand" href="{% url 'index' %}">C.A.L.C.</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <a class="navbar-brand fw-bold" href="{% url 'index' %}">C.A.L.C.</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
+
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    {% if user.is_superuser %}
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    {% if user|has_group:"Admin" %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'advocate_list' %}">Advocates</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'payment_history' %}">Payment History</a>
+                        <a class="nav-link" href="{% url 'payment_due_report' %}">Payment History</a>
                     </li>
                     {% endif %}
                 </ul>
-                {% if user.is_authenticated %}
-                <ul class="navbar-nav"> 
+
+                <ul class="navbar-nav ms-auto">
+                    {% if user.is_authenticated %}
                     <li class="nav-item">
-                        <span class="navbar-text text-white me-3">Welcome, {{ user.username|title }}!</span>
+                        <span class="navbar-text text-white me-3">Welcome, {{ user.get_full_name|title }}</span>
                     </li>
-                    <li>
-                        <form  method="post" action="{% url 'logout' %}">
+                    <li class="nav-item">
+                        <form method="post" action="{% url 'logout' %}">
                             {% csrf_token %}
-                            <button class="logout" type="submit">Logout</button>
+                            <button type="submit" class="btn btn-outline-light btn-sm">Logout</button>
                         </form>
                     </li>
-                </ul>
-                {% else %}
-                <ul class="navbar-nav">
+                    {% else %}
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Login</a>
+                        <a class="nav-link" href="{% url 'login' %}">Login</a>
                     </li>
+                    {% endif %}
                 </ul>
-                {% endif %}
             </div>
         </div>
     </nav>
 
     <!-- Main Content -->
-    <div  class="container mt-5">
+    <div class="container mt-4">
         {% if messages %}
-        <div class="alert alert-warning">
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
             {% for message in messages %}
-            <p>{{ message }}</p>
+                {{ message }}
             {% endfor %}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
         {% endif %}
-        {% block content %}
-        <!-- Content will be injected here -->
-        {% endblock %}
+        {% block content %}{% endblock %}
     </div>
 
     <!-- Footer -->
-    <footer class="bg-dark text-white text-center py-3 mt-4">
-        <p class="mb-0">C.A.L.C. - Counsel Accounting and Ledger Control &copy; 2025</p>
+    <footer class="bg-dark text-white text-center py-3 mt-5">
+        <p class="mb-0">C.A.L.C. - Counsel Accounting and Ledger Control &copy; {{ now|date:"Y" }}</p>
     </footer>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
-    {% block extra_js %}
-    <!-- Extra JS scripts can be added here -->
-    {% endblock %}
+
+    {% block extra_js %}{% endblock %}
 </body>
 </html>

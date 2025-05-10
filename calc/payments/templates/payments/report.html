@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4 text-center">Payment Report</h2>
+
+    <!-- Filters Form -->
+    <form method="get" class="row g-3 mb-4 align-items-center">
+        <div class="col-md-3">
+            <label for="advocate" class="form-label">Advocate</label>
+            <select name="advocate" id="advocate" class="form-select">
+                <option value="">All Advocates</option>
+                {% for adv in advocates %}
+                    <option value="{{ adv.id }}" {% if filters.advocate == adv.id|stringformat:"s" %}selected{% endif %}>
+                        {{ adv.user.get_full_name }} ({{ adv.enrolment_no }})
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <label for="month" class="form-label">Month</label>
+            <select name="month" id="month" class="form-select">
+                <option value="">All Months</option>
+                {% for val, label in MONTH_CHOICES %}
+                    <option value="{{ val }}" {% if filters.month == val %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <label for="year" class="form-label">Year</label>
+            <input type="number" name="year" id="year" class="form-control" placeholder="Year" value="{{ filters.year|default:2025 }}">
+        </div>
+
+        <div class="col-md-2">
+            <label for="status" class="form-label">Status</label>
+            <select name="status" id="status" class="form-select">
+                <option value="all" {% if filters.status == "all" %}selected{% endif %}>All</option>
+                <option value="paid" {% if filters.status == "paid" %}selected{% endif %}>Paid</option>
+                <option value="unpaid" {% if filters.status == "unpaid" %}selected{% endif %}>Unpaid</option>
+            </select>
+        </div>
+
+        <div class="col-md-2 text-md-end">
+            <button type="submit" class="btn btn-primary w-100">Filter</button>
+        </div>
+    </form>
+
+    <!-- Check Dues Button (Centered and Well-placed) -->
+    <div class="text-center mb-4">
+        <form method="POST" action="{% url 'check_dues' %}" onsubmit="return confirmCheckDues();">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success btn-lg w-75">Check and Update Dues for All Advocates</button>
+        </form>
+        <script>
+            function confirmCheckDues() {
+                return confirm("Are you sure you want to check and update dues for all advocates? This action should only be performed once per month.");
+            }
+        </script>
+        
+    </div>
+
+    <!-- Total Counters -->
+    <div class="row mb-4 text-center">
+        <div class="col-md-4">
+            <div class="card p-4 shadow-sm">
+                <h5 class="card-title">Total Advocates</h5>
+                <p class="fs-3 fw-bold">{{ advocates|length }}</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card p-4 shadow-sm">
+                <h5 class="card-title">Total Payments</h5>
+                <p class="fs-3 fw-bold">{{ payments|length }}</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card p-4 shadow-sm">
+                <h5 class="card-title">
+                    {% if filters.status == "paid" %}
+                        Total Paid Dues
+                    {% elif filters.status == "unpaid" %}
+                        Total Unpaid Dues
+                    {% else %}
+                        Total Paid/Unpaid Dues
+                    {% endif %}
+                </h5>
+                <p class="fs-3 fw-bold">{{ dues|length }}</p>
+            </div>
+        </div>        
+    </div>
+
+    <!-- Payments Table -->
+    <h4 class="mt-5">Payments</h4>
+    <div class="table-responsive mb-5" style="max-height: 400px; overflow-y: auto;">
+        <table class="table table-striped table-bordered align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Advocate</th>
+                    <th>Month</th>
+                    <th>Year</th>
+                    <th>Amount</th>
+                    <th>Date</th>
+                    <th>Serial</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in payments %}
+                    <tr>
+                        <td>{{ p.advocate.user.get_full_name }}</td>
+                        <td>{{ p.get_month_display }}</td>
+                        <td>{{ p.year }}</td>
+                        <td>₹{{ p.amount }}</td>
+                        <td>{{ p.payment_date }}</td>
+                        <td>{{ p.serial_number }}</td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="6" class="text-center">No payments found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pending Dues Table -->
+    <h4>Pending Dues</h4>
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Advocate</th>
+                    <th>Month</th>
+                    <th>Year</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for d in dues %}
+                    <tr>
+                        <td>{{ d.advocate.user.get_full_name }}</td>
+                        <td>{{ d.get_month_display }}</td>
+                        <td>{{ d.year }}</td>
+                        <td>₹{{ d.amount }}</td>
+                        <td>
+                            {% if d.paid %}
+                                <span class="badge bg-success">Paid</span>
+                            {% else %}
+                                <span class="badge bg-danger">Unpaid</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="5" class="text-center">No dues found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

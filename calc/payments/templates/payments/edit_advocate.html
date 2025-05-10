@@ -4,7 +4,6 @@
 {% block title %}Edit Advocate{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
     <h2 class="text-center mb-4">Edit Advocate Profile</h2>
 
     <!-- Form for Editing Advocate Profile -->
@@ -70,8 +69,13 @@
                     {{ advocate_form.date_of_enrolment|add_class:"form-control" }}
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label for="{{ advocate_form.bar_registration.id_for_label }}" class="form-label">Bar Registration Number</label>
-                    {{ advocate_form.bar_registration|add_class:"form-control" }}
+                    <label for="{{ advocate_form.kawf_no.id_for_label }}" class="form-label">KAWF Number</label>
+                    {{ advocate_form.kawf_no|add_class:"form-control" }}
+                    <div class="invalid-feedback">
+                    {% for error in advocate_form.kawf_no.errors %}
+                            <p>{{ error }}</p>
+                    {% endfor %}
+                     </div>
                 </div>
             </div>
 
@@ -114,12 +118,12 @@
             
                         <!-- Profile Picture Field (Right Side) -->
                         <div class="col-md-12 mb-3">
-                            <label for="{{ advocate_form.kawf_no.id_for_label }}" class="form-label">KAWF Number</label>
-                            {{ advocate_form.kawf_no|add_class:"form-control" }}
-                            <div class="invalid-feedback">
-                                {% for error in advocate_form.kawf_no.errors %}
-                                    <p>{{ error }}</p>
-                                {% endfor %}
+                            <label for="{{ advocate_form.picture.id_for_label }}" class="form-label">Profile Picture</label>
+                            <div class="d-flex align-items-center">
+                                {% if advocate_form.instance.picture %}
+                                    <img src="{{ advocate_form.instance.picture.url }}" class="img-thumbnail me-3" width="100">
+                                {% endif %}
+                                <input type="file" name="picture" class="form-control" id="{{ advocate_form.picture.id_for_label }}">
                             </div>
                         </div>
                     </div>
@@ -127,17 +131,6 @@
             </div>
         
 
-            <!-- Profile Picture Section -->
-            <div class="mb-3">
-                <label for="{{ advocate_form.picture.id_for_label }}" class="form-label">Profile Picture</label>
-                <div class="d-flex align-items-center">
-                    {% if advocate_form.instance.picture %}
-                        <img src="{{ advocate_form.instance.picture.url }}" class="img-thumbnail me-3" width="100">
-                    {% endif %}
-                    <input type="file" name="picture" class="form-control" id="{{ advocate_form.picture.id_for_label }}">
-                </div>
-            </div>
-        </div>
 
         <!-- Submit and Cancel Buttons -->
         <div class="d-flex justify-content-center gap-3 mt-4">
