@@ -811,3 +811,29 @@ from django.http import HttpResponseNotFound
 
 def handle_unknown_path(request, unknown_path):
     return HttpResponseNotFound('Page not found.')
+
+
+from weasyprint import HTML, CSS
+from django.template.loader import render_to_string
+from django.http import HttpResponse
+import tempfile
+
+def generate_experience_certificate(request, advocate_id):
+    advocate = Advocate.objects.get(id=advocate_id)
+
+    # Render the HTML string with advocate details
+    html_string = render_to_string('payments/certificate_template.html', {
+        'advocate_name': advocate.user.get_full_name(),
+        'enrolment_date': advocate.date_of_enrolment.strftime('%d-%m-%Y'),
+        'roll_no': advocate.enrolment_no,
+        'joined_date': advocate.joined_date.strftime('%d-%m-%Y'),
+    })
+
+    # Generate PDF response
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename=Experience_Certificate_{advocate.user.get_full_name()}.pdf'
+
+    # Generate PDF from the HTML string with A4 size
+    HTML(string=html_string).write_pdf(target=response, stylesheets=[CSS(string='@page { size: A4; margin: 0; }')])
+
+    return response

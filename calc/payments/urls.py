@@ -26,7 +26,6 @@ urlpatterns = [
     path('reset_advocate_credentials/<str:advocate_id>/', views.reset_advocate_credentials, name='reset_advocate_credentials'),
     path('report/', views.payment_due_report, name='payment_due_report'),
     path('delete_advocate/<int:advocate_id>/', views.delete_advocate, name='delete_advocate'),
-    path('<path:unknown_path>/', views.handle_unknown_path),
-
+    path('certificate/<int:advocate_id>/', views.generate_experience_certificate, name='generate_certificate'),
 
 ]   

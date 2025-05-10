@@ -56,6 +56,8 @@
               <a href="#" class="btn btn-warning px-4 py-2" data-bs-toggle="modal" data-bs-target="#warningModal" id="resetCredentialsBtn">
                 <i class="fas fa-refresh"></i> Reset Credentials
             </a>
+            <a href="{% url 'generate_certificate' advocate.id %}" class="btn btn-primary" target="_blank">Download Experience Certificate</a>
+
             
 
               <a href="{% url 'edit_advocate' advocate.id %}" class="btn btn-warning px-4 py-2">Edit</a>
