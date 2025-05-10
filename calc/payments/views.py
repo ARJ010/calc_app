@@ -126,6 +126,8 @@ def index(request):
         recent_payments = Payment.objects.filter(advocate=advocate).order_by('-payment_date')[:10]
     except Advocate.DoesNotExist:
         advocate = None
+        due_entries = None
+        recent_payments = None
         if not is_admin:
             # Create only for non-admins
             advocate = Advocate.objects.create(

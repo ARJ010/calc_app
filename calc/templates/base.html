@@ -2,7 +2,13 @@
 {% load group_tags %}
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="
+    background-image: url('{% static 'bg.png' %}');
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: center;
+">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -20,8 +26,13 @@
 
     {% block extra_head %}{% endblock %}
 </head>
-<body>
-    <!-- Navbar -->
+<body style="
+    background-image: url('{% static 'bg.png' %}');
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: center;
+">    <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
         <div class="container-fluid">
             <a class="navbar-brand fw-bold" href="{% url 'index' %}">C.A.L.C.</a>
